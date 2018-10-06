@@ -182,13 +182,14 @@ class Node:
             return None
         if self.left:
             self.left.SearchTreeAux(elements, aux1)
-        print("estou no search")
-        print(self.element)
+        del aux1 [:]
         if self.right:
             self.right.SearchTreeAux(elements, aux1)
 
     def SearchTreeAux(self, elements, aux1):
         print(self.element)
+        print(aux1)
+        print(elements)
         if tp.get(self.element) is not None:
             aux1.append(self.element)
             if self.left is not None:
@@ -196,12 +197,14 @@ class Node:
                 self.left.SearchTreeAux(elements, aux1)
             if self.right is not None:
                 print("right")
+                aux1.append(self.element)
                 self.right.SearchTreeAux(elements, aux1)
-        else: aux1 = []
-        if self.left is None and self.right is None:
+        else: 
+           del aux1[-1]
+        if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso entrar aqui
             for e in aux1:
                 elements.append(e)
-            aux1 = []
+            del aux1[:]
             return elements
 
 
