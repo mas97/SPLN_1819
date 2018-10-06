@@ -199,13 +199,13 @@ class Node:
                 print("right")
                 aux1.append(self.element)
                 self.right.SearchTreeAux(elements, aux1)
-        else: 
+        else:
+           print("LIMPA") 
            del aux1[-1]
-        if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso entrar aqui
+        if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
             for e in aux1:
                 elements.append(e)
-            del aux1[:]
-            return elements
+            del aux1[-1]
 
 
 #root = Node("root", str) # não me interessa o elemento da raiz chamei-lhe root
