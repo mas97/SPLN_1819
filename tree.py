@@ -177,23 +177,32 @@ class Node:
             self.right.PrintTree()
 
 # Tree search
-    def SearchTree(self, elements):
+    def SearchTree(self, elements, aux1):
         if self is None:
             return None
         if self.left:
-            self.left.SearchTreeAux(elements)
+            self.left.SearchTreeAux(elements, aux1)
+        print("estou no search")
+        print(self.element)
         if self.right:
-            self.right.SearchTreeAux(elements)
+            self.right.SearchTreeAux(elements, aux1)
 
-    def SearchTreeAux(self, elements):
-        if self.left is None and self.right is None:
-            return elements
+    def SearchTreeAux(self, elements, aux1):
+        print(self.element)
         if tp.get(self.element) is not None:
-            elements.append(self.element)
-            if self.left is None:
-                self.right.SearchTreeAux(elements)
-            else:
-                self.left.SearchTreeAux(elements)
+            aux1.append(self.element)
+            if self.left is not None:
+                print("left")
+                self.left.SearchTreeAux(elements, aux1)
+            elif self.right is not None:
+                print("right")
+                self.right.SearchTreeAux(elements, aux1)
+        else: aux1 = []
+        if self.left is None and self.right is None:
+            for e in aux1:
+                elements.append(e)
+            aux1 = []
+            return elements
 
 
 #root = Node("root", str) # não me interessa o elemento da raiz chamei-lhe root

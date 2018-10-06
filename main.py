@@ -18,7 +18,8 @@ for line in fileinput.input():
     #root.PrintTree()
     #print("fim de ciclo")
     elements = []
-    root.SearchTree(elements)
+    aux1 = []
+    root.SearchTree(elements, aux1)
     print(elements)
 
 """     match_elements = []
