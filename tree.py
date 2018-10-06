@@ -194,7 +194,7 @@ class Node:
             if self.left is not None:
                 print("left")
                 self.left.SearchTreeAux(elements, aux1)
-            elif self.right is not None:
+            if self.right is not None:
                 print("right")
                 self.right.SearchTreeAux(elements, aux1)
         else: aux1 = []
