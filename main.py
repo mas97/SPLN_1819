@@ -3,6 +3,8 @@ import sys
 import fileinput
 import re
 import itertools
+from tree import *
+import os
 
 #dá a lista dos elementos todos
 #elements = str(pt.elements.list('symbol'))
@@ -134,8 +136,15 @@ tp = {
 # =========================== ******* ===========================
 
 for line in fileinput.input():
+    aux = line.rstrip()
+    root = Node("root", aux) # não me interessa o elemento da raiz chamei-lhe root
+    root.create(aux[0],aux[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
+    #print(line.rstrip())
+    print("ARVORE")
+    root.PrintTree()
+    print("fim de ciclo")
 
-    match_elements = []
+"""     match_elements = []
     permutations = []
     words = []
 
@@ -160,4 +169,4 @@ for line in fileinput.input():
             print(e)
             length += tp[e]
         if length == len(line):
-            words.append(line)
+            words.append(line) """
