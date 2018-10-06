@@ -199,9 +199,12 @@ class Node:
                 print("right")
                 aux1.append(self.element)
                 self.right.SearchTreeAux(elements, aux1)
+        elif self is None:
+            print("LIMPA") 
+            del aux1[-1]
         else:
-           print("LIMPA") 
-           del aux1[-1]
+            print("LIMPA") 
+            del aux1[-1]
         if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
             for e in aux1:
                 elements.append(e)
