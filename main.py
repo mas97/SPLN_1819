@@ -5,46 +5,81 @@ import re
 import itertools
 from tree import *
 import os
+import getopt
 
-#dá a lista dos elementos todos
-#elements = str(pt.elements.list('symbol'))
+def main():
+    inputfile = ''
+    outputfile = ''
+    try: 
+        opts, args = getopt.getopt(sys.argv[1:],"i:o:hv",["ifile=","ofile=","help=","version="])
+    except getopt.GetoptError:
+        print('main.py [-i <inputfile>] [-o <outputfile>]')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            print('main.py [-i <inputfile>] [-o <outputfile>]')
+            sys.exit()
+        elif opt in ('-v', '--version'):
+            print('Version 1.0')
+            sys.exit()
+        elif opt in ('-i', '--ifile'):
+            inputfile = arg
+        elif opt in ('-o', '--ofile'):
+            outputfile = arg
 
-for line in fileinput.input():
-    aux = line.rstrip()
-    root = Node("root", aux) # não me interessa o elemento da raiz chamei-lhe root
-    root.create(aux[0],aux[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
-    #print(line.rstrip())
-    #print("ARVORE")
-    #root.PrintTree()
-    #print("fim de ciclo")
-    elements = []
-    collectElems = []
-    root.SearchTree(elements, collectElems)
-    print(elements)
+    # input from STDIN or file
+    if inputfile != '':
+        input = open(inputfile, 'r')
+    else:
+        input = sys.stdin
+    # output to STDOUT or file
+    if outputfile != '':
+        output = open(outputfile, 'w+')
+    else:
+        output = sys.stdout
 
-"""     match_elements = []
-    permutations = []
-    words = []
+    process_words(input, output)
 
-    for key, value in tp.items():
-        if re.search(key, line):
-            match_elements.append(key)
-    
-    #print(len(line))
 
-    # -1 porque estou a subtrair o \n
-    for i in range(1, len(line) - 1):
-        aux = list(itertools.combinations(match_elements, i))
-        if aux != []:
-            permutations.append(aux)
-    
-    #print(permutations)
-    
-    length = 0
+def process_words(input, output):
+    line = input.readline()
+    while(line != ''):
+        line = line.rstrip()
+        root = Node("root", line) # não me interessa o elemento da raiz chamei-lhe root
+        root.create(line[0],line[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
+        elements = []
+        collectElems = []
+        root.SearchTree(elements, collectElems)
+        pretty_print(elements, output)
+        line = input.readline()
 
-    for p in permutations:
-        for e in p:
-            print(e)
-            length += tp[e]
-        if length == len(line):
-            words.append(line) """
+def pretty_print(elements, output):
+    #Para não ter uma ',' antes do primeiro simbolo no output
+    first = True 
+
+    #Para não ter uma ';' no final da linha
+    last = False 
+
+    for e in elements:
+        #Caso tenha acabado um conjunto de 
+        #simbolos e vai começar outro
+        if (e != '!' and first and last): 
+            print(';' + e, end='', file=output)
+            first = False
+            last = False
+        #Caso seja o primeiro não mete ','
+        elif (e != '!' and first): 
+            print(e, end='', file=output)
+            first = False
+        #Caso não seja o primeiro então mete ',' antes
+        elif (e != '!'):
+            print(',' + e, end='', file=output)
+        #Se chegou ao fim pede para meter ';'
+        else:
+            first = True
+            last = True
+
+    #Muda de linha para imprimir os resultados de outra palavra
+    print('', file=output)
+
+main()
