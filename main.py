@@ -7,6 +7,8 @@ from tree import *
 import os
 import getopt
 import threading
+import queue
+import codecs
 
 def main():
     inputfile = ''
@@ -33,7 +35,7 @@ def main():
 
     # input from STDIN or file
     if inputfile != '':
-        input = open(inputfile, 'r')
+        input = codecs.open(inputfile, 'r', 'latin1')
     else:
         input = sys.stdin
     # output to STDOUT or file
@@ -42,22 +44,40 @@ def main():
     else:
         output = sys.stdout
 
-    #Array with words represented by elements
+    # Array with words represented by elements
     elements = []
 
     # process_words(input, output)
     threadLock = threading.Lock()
     threads = []
 
-    for i in range(0,nthreads):
+    # Create queue
+    q = queue.Queue()
+
+    for i in range(nthreads):
         # Create new thread
-        threadI = myThread(i, input, output, threadLock, elements)
+        t = myThread(input, threadLock, elements, q)
+        t.setDaemon(True)
         # Add thread to thread list
-        threads.append(threadI)
+        threads.append(t)
 
     # Start new Threads
     for t in threads:
        t.start()
+
+    for rawLine in input:
+        m = re.search(r'\t(.+$)', rawLine)
+        if m is not None:
+            line = m.group(1)
+            if (line != ''):
+                #Put line to queue
+                q.put(line)
+
+    #wait on the queue until everything has been processed 
+    q.join()
+
+    for i in range(nthreads):
+        q.put(None)
 
     # Wait for all threads to complete
     for t in threads:
@@ -66,26 +86,41 @@ def main():
     pretty_print(elements, output)
 
 class myThread (threading.Thread):
-    def __init__(self, threadID, input, output, threadLock, elements):
+    def __init__(self, input, threadLock, elements, q):
         threading.Thread.__init__(self)
-        self.threadID = threadID
         self.input = input
-        self.output = output
         self.threadLock = threadLock
         self.elements = elements
+        self.q = q
     def run(self):
-        process_words(self.input, self.output, self.threadLock, self.elements)
+        while True:
+            line = self.q.get()
+            # print(line)
+            if line is None:
+                break
+            process_words(line, self.input, self.threadLock, self.elements)
+            self.q.task_done()
 
-def process_words(input, output, threadLock, elements):
-    line = input.readline()
-    line = line.rstrip()
-    while(line != ''):
+def process_words(line, input, threadLock, elements):
+    # line = ''
+    # rawLine = input.readline()
+    # if rawLine is not None:
+        # m = re.search(r'\t(.+$)', rawLine)
+        # if m is not None:
+            # line = m.group(1)
+    # line = line.rstrip()
+    if(line != ''):
         root = Node("root", line) # não me interessa o elemento da raiz chamei-lhe root
         root.create(line[0],line[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
         collectElems = []
         root.SearchTree(elements, collectElems, threadLock)
-        line = input.readline()
-        line = line.rstrip()
+        # line = ''
+        # rawLine = input.readline()
+        # if rawLine is not None:
+            # m = re.search(r'\t(.+$)', rawLine)
+            # if m is not None:
+                # line = m.group(1)
+        # line = line.rstrip()
 
 def pretty_print(elements, output):
     #Para não ter uma ',' antes do primeiro simbolo no output
