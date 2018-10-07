@@ -1,4 +1,4 @@
-import periodictable as pt
+#import periodictable as pt
 import sys
 import fileinput
 import re
@@ -18,8 +18,8 @@ for line in fileinput.input():
     #root.PrintTree()
     #print("fim de ciclo")
     elements = []
-    aux1 = []
-    root.SearchTree(elements, aux1)
+    collectElems = []
+    root.SearchTree(elements, collectElems)
     print(elements)
 
 """     match_elements = []

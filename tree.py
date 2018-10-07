@@ -177,38 +177,30 @@ class Node:
             self.right.PrintTree()
 
 # Tree search
-    def SearchTree(self, elements, aux1):
+    def SearchTree(self, elements, collectElems):
         if self is None:
             return None
         if self.left:
-            self.left.SearchTreeAux(elements, aux1)
-        del aux1 [:]
+            self.left.SearchTreeAux(elements, collectElems)
+        del collectElems [:]
+        collectElemsRight = collectElems.copy()
         if self.right:
-            self.right.SearchTreeAux(elements, aux1)
+            self.right.SearchTreeAux(elements, collectElemsRight)
 
-    def SearchTreeAux(self, elements, aux1):
-        print(self.element)
-        print(aux1)
-        print(elements)
+    def SearchTreeAux(self, elements, collectElems):
         if tp.get(self.element) is not None:
-            aux1.append(self.element)
+            collectElems.append(self.element)
+            collectElemsRight = collectElems.copy()
             if self.left is not None:
-                print("left")
-                self.left.SearchTreeAux(elements, aux1)
+                self.left.SearchTreeAux(elements, collectElems)
             if self.right is not None:
-                print("right")
-                aux1.append(self.element)
-                self.right.SearchTreeAux(elements, aux1)
-        elif self is None:
-            print("LIMPA") 
-            del aux1[-1]
-        else:
-            print("LIMPA") 
-            del aux1[-1]
+                self.right.SearchTreeAux(elements, collectElemsRight)
+
         if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
-            for e in aux1:
+            for e in collectElems:
                 elements.append(e)
-            del aux1[-1]
+            elements.append("!")
+            del collectElems[-1]
 
 
 #root = Node("root", str) # não me interessa o elemento da raiz chamei-lhe root
