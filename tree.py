@@ -177,29 +177,31 @@ class Node:
             self.right.PrintTree()
 
 # Tree search
-    def SearchTree(self, elements, collectElems):
+    def SearchTree(self, elements, collectElems, threadLock):
         if self is None:
             return None
         if self.left:
-            self.left.SearchTreeAux(elements, collectElems)
+            self.left.SearchTreeAux(elements, collectElems, threadLock)
         del collectElems [:]
         collectElemsRight = collectElems.copy()
         if self.right:
-            self.right.SearchTreeAux(elements, collectElemsRight)
+            self.right.SearchTreeAux(elements, collectElemsRight, threadLock)
 
-    def SearchTreeAux(self, elements, collectElems):
+    def SearchTreeAux(self, elements, collectElems, threadLock):
         if tp.get(self.element) is not None:
             collectElems.append(self.element)
             collectElemsRight = collectElems.copy()
             if self.left is not None:
-                self.left.SearchTreeAux(elements, collectElems)
+                self.left.SearchTreeAux(elements, collectElems, threadLock)
             if self.right is not None:
-                self.right.SearchTreeAux(elements, collectElemsRight)
+                self.right.SearchTreeAux(elements, collectElemsRight, threadLock)
 
         if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
+            threadLock.acquire()
             for e in collectElems:
                 elements.append(e)
             elements.append("!")
+            threadLock.release()
             del collectElems[-1]
 
 
