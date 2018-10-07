@@ -15,11 +15,11 @@ def main():
     try: 
         opts, args = getopt.getopt(sys.argv[1:],"t:i:o:hv",["threads=","ifile=","ofile=","help=","version="])
     except getopt.GetoptError:
-        print('main.py [-i <inputfile>] [-o <outputfile>]')
+        print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
         sys.exit(2)
     for opt, arg in opts:
         if opt in ('-h', '--help'):
-            print('main.py [-i <inputfile>] [-o <outputfile>]')
+            print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
             sys.exit()
         elif opt in ('-v', '--version'):
             print('Version 1.0')
