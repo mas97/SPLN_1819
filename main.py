@@ -154,7 +154,7 @@ def WriteFile(file_name, elements):
         # escrita do código html de abertura de uma row em html para o posicionamento de imagens
         # uma row para cada palavra a representar
         file.write("\t<div class=\"column\">")
-        file.write("\t\t<img src=\"" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">")
+        file.write("\t\t<img src=images/\"" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">")
         file.write("\t</div>")
     
     # abertura da primeira div do tipo row VER ESTE CASO
