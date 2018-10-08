@@ -64,6 +64,7 @@ def main():
        t.join()
 
     pretty_print(elements, output)
+    WriteFile("index.html", elements)
 
 class myThread (threading.Thread):
     def __init__(self, threadID, input, output, threadLock, elements):
@@ -115,5 +116,39 @@ def pretty_print(elements, output):
 
     #Newline no final
     print('', file=output)
+
+
+def WriteFile(file_name, elements):
+    fst_row = True
+    file = open(file_name, "w")
+    # escrita do cabeçalho do ficheiro html
+    file.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>")
+
+    # abertura da primeira div do tipo row
+    if len(elements) > 0:
+        file.write("<div class=\"row\">")
+    
+    for e in elements:
+        # escrita do código html para a criação de uma nova row
+        if e == "!":
+            if fst_row == False:
+                file.write("</div>")
+                file.write("<div class=\"row\">")
+            fst_row = False
+        
+        # escrita do código html de abertura de uma row em html para o posicionamento de imagens
+        # uma row para cada palavra a representar
+        file.write("\t<div class=\"column\">")
+        file.write("\t\t<img src=\"" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">")
+        file.write("\t</div>")
+    
+    # abertura da primeira div do tipo row VER ESTE CASO
+    if len(elements) > 0:
+        file.write("</div>")
+
+    # escrita do fecho do ficheiro html
+    file.write("</body>\n</html>")
+
+
 
 main()
