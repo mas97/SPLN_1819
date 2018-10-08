@@ -7,6 +7,9 @@ from tree import *
 import os
 import getopt
 import threading
+import queue
+import codecs
+import datetime
 
 def main():
     inputfile = ''
@@ -25,7 +28,9 @@ def main():
             print('Version 1.0')
             sys.exit()
         elif opt in ('-t', '--threads'):
-            nthreads = int(arg)
+            # nthreads = int(arg)
+            print('The Thread feature is disabled for the moment.')
+            sys.exit()
         elif opt in ('-i', '--ifile'):
             inputfile = arg
         elif opt in ('-o', '--ofile'):
@@ -33,7 +38,7 @@ def main():
 
     # input from STDIN or file
     if inputfile != '':
-        input = open(inputfile, 'r')
+        input = codecs.open(inputfile, 'r', 'latin1')
     else:
         input = sys.stdin
     # output to STDOUT or file
@@ -42,51 +47,61 @@ def main():
     else:
         output = sys.stdout
 
-    #Array with words represented by elements
+    # Array with words represented by elements
     elements = []
 
-    # process_words(input, output)
-    threadLock = threading.Lock()
-    threads = []
+    # Create queue
+    q = queue.Queue()
 
-    for i in range(0,nthreads):
-        # Create new thread
-        threadI = myThread(i, input, output, threadLock, elements)
-        # Add thread to thread list
-        threads.append(threadI)
+    # Create new thread
+    t = myThread(input, elements, q)
+    t.setDaemon(True)
 
-    # Start new Threads
-    for t in threads:
-       t.start()
+    # Start new Thread
+    t.start()
+
+    for rawLine in input:
+        # m = re.search(r'\t(.+$)', rawLine)
+        # if m is not None:
+            # line = m.group(1)
+            # if (line != ''):
+                # #Put line to queue
+                # q.put(line)
+        rawLine = rawLine.rstrip()
+        q.put(rawLine)
+
+    #wait on the queue until everything has been processed 
+    q.join()
+
+    # Close de queue
+    q.put(None)
 
     # Wait for all threads to complete
-    for t in threads:
-       t.join()
+    t.join()
 
     pretty_print(elements, output)
     WriteFile("index.html", elements)
 
 class myThread (threading.Thread):
-    def __init__(self, threadID, input, output, threadLock, elements):
+    def __init__(self, input, elements, q):
         threading.Thread.__init__(self)
-        self.threadID = threadID
         self.input = input
-        self.output = output
-        self.threadLock = threadLock
         self.elements = elements
+        self.q = q
     def run(self):
-        process_words(self.input, self.output, self.threadLock, self.elements)
+        while True:
+            line = self.q.get()
+            if line is None:
+                break
+            process_words(line, self.input, self.elements)
+            self.q.task_done()
 
-def process_words(input, output, threadLock, elements):
-    line = input.readline()
-    line = line.rstrip()
-    while(line != ''):
+def process_words(line, input, elements):
+    if(line != ''):
         root = Node("root", line) # não me interessa o elemento da raiz chamei-lhe root
         root.create(line[0],line[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
         collectElems = []
-        root.SearchTree(elements, collectElems, threadLock)
-        line = input.readline()
-        line = line.rstrip()
+        root.SearchTree(elements, collectElems)
 
 def pretty_print(elements, output):
     #Para não ter uma ',' antes do primeiro simbolo no output
