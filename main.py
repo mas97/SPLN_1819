@@ -78,7 +78,7 @@ def main():
 
     # Wait for all threads to complete
     t.join()
-
+    elements = elements[:-1]
     pretty_print(elements, output)
     WriteFile("index.html", elements)
 
@@ -146,10 +146,12 @@ def WriteFile(file_name, elements):
     for e in elements:
         # escrita do código html para a criação de uma nova row
         if e == "!":
-            if fst_row == False:
+            if fst_row:
+                file.write("<div class=\"row\">\n")
+                fst_row = False
+            else:
                 file.write("</div>\n")
                 file.write("<div class=\"row\">\n")
-            fst_row = False
         else:
             # escrita do código html de abertura de uma row em html para o posicionamento de imagens
             # uma row para cada palavra a representar
