@@ -146,30 +146,30 @@ class Node:
         self.left = None #arvore da esquerda
         self.right = None #arvore da direita
         self.element = element #elemento quimico
-        self.word = line #parte da string que falta adicionar a arvore a partir deste nodo
+        self.word = line # palavra representada na árvore
         self.remainderWord = word #parte da string que falta adicionar a arvore a partir deste nodo
 
+    # Função de create
     def create(self, element,remainderWord, line):
-# Função de create
-            if self.left is None:
-                self.left = Node(element, remainderWord, line)
-                if remainderWord:
-                    self.left.create(remainderWord[0],remainderWord[1:], line)
-                else:
-                    return
-            if self.right is None:
-                if remainderWord :
-                    self.right = Node(element + remainderWord[0], remainderWord[1:], line)
-                    if remainderWord[1:]:
-                        self.right.create(remainderWord[1], remainderWord[2:], line)
-                    else: 
-                        return
-                else :
-                    return
+        if self.left is None:
+            self.left = Node(element, remainderWord, line)
+            if remainderWord:
+                self.left.create(remainderWord[0],remainderWord[1:], line)
             else:
                 return
+        if self.right is None:
+            if remainderWord :
+                self.right = Node(element + remainderWord[0], remainderWord[1:], line)
+                if remainderWord[1:]:
+                    self.right.create(remainderWord[1], remainderWord[2:], line)
+                else: 
+                    return
+            else :
+                return
+        else:
+            return
 
-# Print the tree
+    # Print the tree
     def PrintTree(self):
         if self.left:
             self.left.PrintTree()
@@ -177,7 +177,7 @@ class Node:
         if self.right:
             self.right.PrintTree()
 
-# Tree search
+    # Tree search
     def SearchTree(self, elements, collectElems):
         if self is None:
             return None
@@ -197,23 +197,11 @@ class Node:
             if self.right is not None:
                 self.right.SearchTreeAux(elements, collectElemsRight)
 
-        if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
-            # for e in collectElems:
+        if self.left is None and self.right is None and tp.get(self.element) is not None:
             if collectElems != []:
                 if self.word in elements:
                     elements[self.word].append(collectElems.copy())
                 else:
                     elements[self.word] = []
                     elements[self.word].append(collectElems.copy())
-                # if (self.word == 'pouco'):
-                # print(self.word)
-                    # print(elements[self.word])
-                # elements.append("!")
                 del collectElems[-1]
-
-
-#root = Node("root", str) # não me interessa o elemento da raiz chamei-lhe root
-#root.create(str[0],str[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
-
-#print("ARVORE")
-#root.PrintTree()

@@ -1,4 +1,3 @@
-#import periodictable as pt
 import sys
 import fileinput
 import re
@@ -47,40 +46,17 @@ def main():
     else:
         output = sys.stdout
 
-    # Array with words represented by elements
+    # Dictionary
+    # key   -> word
+    # value -> array of arrays of elements
     elements = {}
 
-    # Create queue
-    q = queue.Queue()
-
-    # Create new thread
-    t = myThread(input, elements, q)
-    t.setDaemon(True)
-
-    # Start new Thread
-    t.start()
-
     for rawLine in input:
-        # m = re.search(r'\t(.+$)', rawLine)
-        # if m is not None:
-            # line = m.group(1)
-            # if (line != ''):
-                # #Put line to queue
-                # q.put(line)
-        rawLine = rawLine.rstrip()
-        q.put(rawLine)
+        line = rawLine.rstrip()
+        process_words(line, input, elements)
 
-    #wait on the queue until everything has been processed 
-    q.join()
-
-    # Close de queue
-    q.put(None)
-
-    # Wait for all threads to complete
-    t.join()
-    # print(elements['pouco'])
-    pretty_print(elements, output)
-    WriteFile("index.html", elements)
+    # Generate HTML file
+    writeFile(output, elements)
 
 class myThread (threading.Thread):
     def __init__(self, input, elements, q):
@@ -103,76 +79,25 @@ def process_words(line, input, elements):
         collectElems = []
         root.SearchTree(elements, collectElems)
 
-def pretty_print(elements, output):
-    #Para não ter uma ',' antes do primeiro simbolo no output
-    first = True 
 
-    #Para não ter uma ';' no final da linha
-    last = False 
-
-    for e in elements:
-        #Caso tenha acabado um conjunto de 
-        #simbolos e vai começar outro
-        if (e != '!' and first and last): 
-            print('\n' + e, end='', file=output)
-            first = False
-            last = False
-        #Caso seja o primeiro não mete ','
-        elif (e != '!' and first): 
-            print(e, end='', file=output)
-            first = False
-        #Caso não seja o primeiro então mete ',' antes
-        elif (e != '!'):
-            print(',' + e, end='', file=output)
-        #Se chegou ao fim pede para meter '\n' entre palavras
-        else:
-            first = True
-            last = True
-
-    #Newline no final
-    print('', file=output)
-
-
-def WriteFile(file_name, elements):
+def writeFile(output, elements):
     fst_row = True
-    file = open(file_name, "w")
-    # escrita do cabeçalho do ficheiro html
-    file.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>\n")
 
-    # abertura da primeira div do tipo row
-    # if len(elements) > 0:
-        # file.write("<div class=\"row\">\n")
-    
+    # escrita do cabeçalho do ficheiro html
+    output.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>\n")
+
     ks = elements.keys();
     for k in ks:
         for elems in elements[k]:
-            file.write("<div class=\"row\">\n")
+            output.write("<div class=\"row\">\n")
             for e in elems:
-                file.write("\t<td>\n")
-                file.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
-                file.write("\t</td>\n")
-            file.write("</div>\n")
-        # escrita do código html para a criação de uma nova row
-        # if e == "!":
-            # if fst_row:
-                # file.write("<div class=\"row\">\n")
-                # fst_row = False
-            # else:
-                # file.write("</div>\n")
-                # file.write("<div class=\"row\">\n")
-        # else:
-            # # escrita do código html de abertura de uma row em html para o posicionamento de imagens
-            # # uma row para cada palavra a representar
-            # file.write("\t<td>\n")
-            # file.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
-            # file.write("\t</td>\n")
-    
-    # abertura da primeira div do tipo row VER ESTE CASO
-    # if len(elements) > 0:
-        # file.write("</div>\n")
+                output.write("\t<td>\n")
+                output.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
+                output.write("\t</td>\n")
+            output.write("</div>\n")
 
     # escrita do fecho do ficheiro html
-    file.write("</body>\n</html>")
+    output.write("</body>\n</html>")
 
 
 
