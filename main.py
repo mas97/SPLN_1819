@@ -81,13 +81,13 @@ def process_words(line, input, elements):
 
 
 def writeFile(output, elements):
-    fst_row = True
 
     # escrita do cabeçalho do ficheiro html
     output.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>\n")
 
-    ks = elements.keys();
+    ks = elements.keys()
     for k in ks:
+        output.write("<h1>" + k + "</h1>")
         for elems in elements[k]:
             output.write("<div class=\"row\">\n")
             for e in elems:
@@ -95,6 +95,7 @@ def writeFile(output, elements):
                 output.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
                 output.write("\t</td>\n")
             output.write("</div>\n")
+        output.write("<hr>")
 
     # escrita do fecho do ficheiro html
     output.write("</body>\n</html>")
