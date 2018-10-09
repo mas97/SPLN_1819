@@ -141,26 +141,27 @@ str= "Neon"
 
 class Node:
 
-    def __init__(self, element, word):
+    def __init__(self, element, word, line):
 
         self.left = None #arvore da esquerda
         self.right = None #arvore da direita
         self.element = element #elemento quimico
+        self.word = line #parte da string que falta adicionar a arvore a partir deste nodo
         self.remainderWord = word #parte da string que falta adicionar a arvore a partir deste nodo
 
-    def create(self, element,remainderWord):
+    def create(self, element,remainderWord, line):
 # Função de create
             if self.left is None:
-                self.left = Node(element, remainderWord)
+                self.left = Node(element, remainderWord, line)
                 if remainderWord:
-                    self.left.create(remainderWord[0],remainderWord[1:])
+                    self.left.create(remainderWord[0],remainderWord[1:], line)
                 else:
                     return
             if self.right is None:
                 if remainderWord :
-                    self.right = Node(element + remainderWord[0], remainderWord[1:])
+                    self.right = Node(element + remainderWord[0], remainderWord[1:], line)
                     if remainderWord[1:]:
-                        self.right.create(remainderWord[1], remainderWord[2:])
+                        self.right.create(remainderWord[1], remainderWord[2:], line)
                     else: 
                         return
                 else :
@@ -197,10 +198,18 @@ class Node:
                 self.right.SearchTreeAux(elements, collectElemsRight)
 
         if self.left is None and self.right is None and tp.get(self.element) is not None: #também tenho que testar aqui se o elemento pertence porque ele pode ser uma folha e não ser da tabela logo nao posso 
-            for e in collectElems:
-                elements.append(e)
-            elements.append("!")
-            del collectElems[-1]
+            # for e in collectElems:
+            if collectElems != []:
+                if self.word in elements:
+                    elements[self.word].append(collectElems.copy())
+                else:
+                    elements[self.word] = []
+                    elements[self.word].append(collectElems.copy())
+                # if (self.word == 'pouco'):
+                # print(self.word)
+                    # print(elements[self.word])
+                # elements.append("!")
+                del collectElems[-1]
 
 
 #root = Node("root", str) # não me interessa o elemento da raiz chamei-lhe root

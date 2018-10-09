@@ -48,7 +48,7 @@ def main():
         output = sys.stdout
 
     # Array with words represented by elements
-    elements = []
+    elements = {}
 
     # Create queue
     q = queue.Queue()
@@ -78,7 +78,7 @@ def main():
 
     # Wait for all threads to complete
     t.join()
-    elements = elements[:-1]
+    # print(elements['pouco'])
     pretty_print(elements, output)
     WriteFile("index.html", elements)
 
@@ -98,8 +98,8 @@ class myThread (threading.Thread):
 
 def process_words(line, input, elements):
     if(line != ''):
-        root = Node("root", line) # não me interessa o elemento da raiz chamei-lhe root
-        root.create(line[0],line[1:]) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
+        root = Node("root", line, line) # não me interessa o elemento da raiz chamei-lhe root
+        root.create(line[0],line[1:], line) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
         collectElems = []
         root.SearchTree(elements, collectElems)
 
@@ -140,28 +140,36 @@ def WriteFile(file_name, elements):
     file.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>\n")
 
     # abertura da primeira div do tipo row
-    if len(elements) > 0:
-        file.write("<div class=\"row\">\n")
+    # if len(elements) > 0:
+        # file.write("<div class=\"row\">\n")
     
-    for e in elements:
+    ks = elements.keys();
+    for k in ks:
+        for elems in elements[k]:
+            file.write("<div class=\"row\">\n")
+            for e in elems:
+                file.write("\t<td>\n")
+                file.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
+                file.write("\t</td>\n")
+            file.write("</div>\n")
         # escrita do código html para a criação de uma nova row
-        if e == "!":
-            if fst_row:
-                file.write("<div class=\"row\">\n")
-                fst_row = False
-            else:
-                file.write("</div>\n")
-                file.write("<div class=\"row\">\n")
-        else:
-            # escrita do código html de abertura de uma row em html para o posicionamento de imagens
-            # uma row para cada palavra a representar
-            file.write("\t<td>\n")
-            file.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
-            file.write("\t</td>\n")
+        # if e == "!":
+            # if fst_row:
+                # file.write("<div class=\"row\">\n")
+                # fst_row = False
+            # else:
+                # file.write("</div>\n")
+                # file.write("<div class=\"row\">\n")
+        # else:
+            # # escrita do código html de abertura de uma row em html para o posicionamento de imagens
+            # # uma row para cada palavra a representar
+            # file.write("\t<td>\n")
+            # file.write("\t\t<img src=\"images/" + e + ".png\" alt=\"\" width=\"50\" height=\"50\">\n")
+            # file.write("\t</td>\n")
     
     # abertura da primeira div do tipo row VER ESTE CASO
-    if len(elements) > 0:
-        file.write("</div>\n")
+    # if len(elements) > 0:
+        # file.write("</div>\n")
 
     # escrita do fecho do ficheiro html
     file.write("</body>\n</html>")
