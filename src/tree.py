@@ -143,11 +143,11 @@ class Node:
 
     def __init__(self, element, word, line):
 
-        self.left = None #arvore da esquerda
-        self.right = None #arvore da direita
-        self.element = element #elemento quimico
-        self.word = line # palavra representada na árvore
-        self.remainderWord = word #parte da string que falta adicionar a arvore a partir deste nodo
+        self.left = None            # arvore da esquerda
+        self.right = None           # arvore da direita
+        self.element = element      # elemento quimico
+        self.word = line            # palavra representada na árvore
+        self.remainderWord = word   # parte da string que falta adicionar a arvore a partir deste nodo
 
     # Função de create
     def create(self, element,remainderWord, line):

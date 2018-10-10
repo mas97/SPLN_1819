@@ -2,8 +2,6 @@ import subprocess
 import sys
 import re
 
-cmds = "sed 's/\t/;/g' | cut -d ';' -f 2 | iconv -f utf8 -t ascii//TRANSLIT | sed -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/' | sort | uniq"
-
 def split_pipes(arr):
      arrs = []
      temp = []
@@ -34,14 +32,4 @@ def separate_cmds(input, cmds_str):
     pinit.stdout.close()
     output,err = p.communicate()
     words = output.decode().split("\n")[:-1]
-    # fd.close()
     return words
-
-
-# separate_cmds("test_files/words_utf8.txt", cmds)
-
-
-# p1 = subprocess.Popen(["cat", "file.log"], stdout=subprocess.PIPE)
-# p2 = subprocess.Popen(["tail", "-1"], stdin=p1.stdout, stdout=subprocess.PIPE)
-# p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
-# output,err = p2.communicate()

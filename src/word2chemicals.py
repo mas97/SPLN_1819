@@ -16,9 +16,8 @@ def main():
     outputfile = ''
     clean = ''
     cleanfile = ''
-    nthreads = 1
     try: 
-        opts, args = getopt.getopt(sys.argv[1:],"f:c:t:i:o:hv",["cleanfile=","clean=","threads=","ifile=","ofile=","help=","version="])
+        opts, args = getopt.getopt(sys.argv[1:],"f:c:i:o:hv",["cleanfile=","clean=","ifile=","ofile=","help=","version="])
     except getopt.GetoptError:
         print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
         sys.exit(2)
@@ -28,10 +27,6 @@ def main():
             sys.exit()
         elif opt in ('-v', '--version'):
             print('Version 1.0')
-            sys.exit()
-        elif opt in ('-t', '--threads'):
-            # nthreads = int(arg)
-            print('The Thread feature is disabled for the moment.')
             sys.exit()
         elif opt in ('-i', '--ifile'):
             inputfile = arg
@@ -47,6 +42,7 @@ def main():
         input = open(inputfile, 'r')
     else:
         input = sys.stdin
+
     # output to STDOUT or file
     if outputfile != '':
         output = open(outputfile, 'w+')
@@ -70,7 +66,6 @@ def main():
     elif clean != '':
         words = separate_cmds(input, clean)
         for word in words:
-            # word = rawLine.rstrip()
             process_words(word, elements)
 
     # Generate HTML file
@@ -79,30 +74,15 @@ def main():
     input.close()
     output.close()
 
-class myThread (threading.Thread):
-    def __init__(self, input, elements, q):
-        threading.Thread.__init__(self)
-        self.input = input
-        self.elements = elements
-        self.q = q
-    def run(self):
-        while True:
-            line = self.q.get()
-            if line is None:
-                break
-            process_words(line, self.input, self.elements)
-            self.q.task_done()
-
 def process_words(line, elements):
     if(line != ''):
-        root = Node("root", line, line) # não me interessa o elemento da raiz chamei-lhe root
-        root.create(line[0],line[1:], line) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
+        root = Node("root", line, line) 
+        root.create(line[0],line[1:], line) 
         collectElems = []
         root.SearchTree(elements, collectElems)
 
 
 def writeFile(output, elements):
-
     # escrita do cabeçalho do ficheiro html
     output.write("<!DOCTYPE html>\n<html>\n<head>\n<title>Chemical Elements</title>\n</head>\n<body>\n")
 
@@ -122,5 +102,5 @@ def writeFile(output, elements):
     output.write("</body>\n</html>")
 
 
-
+# Execuçãoo
 main()
