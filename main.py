@@ -3,6 +3,7 @@ import fileinput
 import re
 import itertools
 from tree import *
+from clean import *
 import os
 import getopt
 import threading
@@ -13,9 +14,11 @@ import datetime
 def main():
     inputfile = ''
     outputfile = ''
+    clean = ''
+    cleanfile = ''
     nthreads = 1
     try: 
-        opts, args = getopt.getopt(sys.argv[1:],"t:i:o:hv",["threads=","ifile=","ofile=","help=","version="])
+        opts, args = getopt.getopt(sys.argv[1:],"f:c:t:i:o:hv",["cleanfile=","clean=","threads=","ifile=","ofile=","help=","version="])
     except getopt.GetoptError:
         print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
         sys.exit(2)
@@ -34,10 +37,14 @@ def main():
             inputfile = arg
         elif opt in ('-o', '--ofile'):
             outputfile = arg
+        elif opt in ('-c', '--clean'):
+            clean = arg
+        elif opt in ('-f', '--cleanfile'):
+            cleanfile = arg
 
     # input from STDIN or file
     if inputfile != '':
-        input = codecs.open(inputfile, 'r', 'latin1')
+        input = open(inputfile, 'r')
     else:
         input = sys.stdin
     # output to STDOUT or file
@@ -46,17 +53,31 @@ def main():
     else:
         output = sys.stdout
 
+    if cleanfile != '':
+        fd = open(cleanfile, 'r')
+        clean = fd.read()
+        fd.close()
+
     # Dictionary
     # key   -> word
     # value -> array of arrays of elements
     elements = {}
 
-    for rawLine in input:
-        line = rawLine.rstrip()
-        process_words(line, input, elements)
+    if inputfile == '':
+        for rawLine in input:
+            line = rawLine.rstrip()
+            process_words(line, elements)
+    elif clean != '':
+        words = separate_cmds(input, clean)
+        for word in words:
+            # word = rawLine.rstrip()
+            process_words(word, elements)
 
     # Generate HTML file
     writeFile(output, elements)
+
+    input.close()
+    output.close()
 
 class myThread (threading.Thread):
     def __init__(self, input, elements, q):
@@ -72,7 +93,7 @@ class myThread (threading.Thread):
             process_words(line, self.input, self.elements)
             self.q.task_done()
 
-def process_words(line, input, elements):
+def process_words(line, elements):
     if(line != ''):
         root = Node("root", line, line) # não me interessa o elemento da raiz chamei-lhe root
         root.create(line[0],line[1:], line) # chama a função create que vai construir recursivamente a arvore a partir do nodo raiz root
