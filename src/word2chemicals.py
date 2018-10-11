@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import sys
 import fileinput
 import re
@@ -19,11 +20,11 @@ def main():
     try: 
         opts, args = getopt.getopt(sys.argv[1:],"f:c:i:o:hv",["cleanfile=","clean=","ifile=","ofile=","help=","version="])
     except getopt.GetoptError:
-        print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
+        print('main.py [-c <commands> | -f <cleanfile>] [-i <inputfile>] [-o <outputfile>]')
         sys.exit(2)
     for opt, arg in opts:
         if opt in ('-h', '--help'):
-            print('main.py [-i <inputfile>] [-o <outputfile>] [-t <num threads>]')
+            print('main.py [-c <commands> | -f <cleanfile>] [-i <inputfile>] [-o <outputfile>]')
             sys.exit()
         elif opt in ('-v', '--version'):
             print('Version 1.0')
@@ -37,9 +38,17 @@ def main():
         elif opt in ('-f', '--cleanfile'):
             cleanfile = arg
 
+    if clean != '' and cleanfile != '':
+        print('Não é possível usar o argumento -c e -f ao mesmo tempo. Escolha um.')
+        sys.exit(2)
+
     # input from STDIN or file
     if inputfile != '':
-        input = open(inputfile, 'r')
+        try:
+            input = open(inputfile, 'r')
+        except FileNotFoundError:
+            print("O ficheiro de input não existe.")
+            sys.exit(2)
     else:
         input = sys.stdin
 
@@ -50,20 +59,24 @@ def main():
         output = sys.stdout
 
     if cleanfile != '':
-        fd = open(cleanfile, 'r')
-        clean = fd.read()
-        fd.close()
+        try:
+            fd = open(cleanfile, 'r')
+            clean = fd.read()
+            fd.close()
+        except FileNotFoundError:
+            print("O ficheiro de limpeza não existe.")
+            sys.exit(2)
 
     # Dictionary
     # key   -> word
     # value -> array of arrays of elements
     elements = {}
 
-    if inputfile == '':
+    if cleanfile == '' and clean == '':
         for rawLine in input:
             line = rawLine.rstrip()
             process_words(line, elements)
-    elif clean != '':
+    else:
         words = separate_cmds(input, clean)
         for word in words:
             process_words(word, elements)

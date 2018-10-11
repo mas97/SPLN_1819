@@ -1,0 +1,1 @@
+cut -d '\ ' -f 2 | iconv -f utf8 -t ascii//TRANSLIT | sed -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/' | sort | uniq
