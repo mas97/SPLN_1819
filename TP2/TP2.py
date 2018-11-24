@@ -4,12 +4,13 @@ import sys
 import getopt
 import requests
 import re
+import string
 import matplotlib.pyplot as plt
 import numpy as np
 from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-opts, args = getopt.getopt(sys.argv[1:], 'bpfa')
+opts, args = getopt.getopt(sys.argv[1:], 'bpfc:')
 ops = dict(opts)
 
 def build():
@@ -55,6 +56,29 @@ def scores_pers(characters):
     sorted_scores = sorted(scores, key=lambda x: x[1])
     for (char, score) in sorted_scores:
         print(char + ': ' + score)
+
+# Score do filme ao longo do tempo
+def along_char_sent(full_char_script):
+    N = 60
+    block_scores = []
+    total = len(full_char_script)
+    block_size = int(len(full_char_script) / N)
+    nltk_sentiment = SentimentIntensityAnalyzer()
+    for i in range(N-1):
+        block_score = nltk_sentiment.polarity_scores(full_char_script[i*block_size:(i+1)*block_size])
+        block_scores.append(block_score.get('compound'))
+    block_score = nltk_sentiment.polarity_scores(full_char_script[i*block_size:])
+    block_scores.append(block_score.get('compound'))
+
+    x = np.arange(0, N)
+    y = block_scores
+
+    fit = np.polyfit(x, y, 1)
+    fit_fn = np.poly1d(fit)
+
+    plt.plot(x, y, 'yo', x, fit_fn(x), '--k')
+    plt.ylabel('< negativo ---- positivo >')
+    plt.show()
 
 # Score do filme
 def full_script_sent(full_script):
@@ -119,14 +143,31 @@ def scrap_titanic():
 
     return full_script, pers
 
+def cleaning_data(text):
+    text = text.lower()
+    text = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', text)
+    text = re.sub(r'\w*\d\w*', ' ', text)
+    text = re.sub('[‘’“”…]', ' ', text)
+    text = re.sub('\n', ' ', text)
+    return text
+
 if '-b' in ops:
     build()
 if '-p' in ops:
-    full_script, chars = scrap_titanic()
-    scores_pers(chars)
+    FULL_SCRIPT, CHARS = scrap_titanic()
+    for k, v in CHARS.items():
+        CHARS[k] = cleaning_data(''.join(v))
+    scores_pers(CHARS)
 if '-f' in ops:
-    full_script, chars = scrap_titanic()
-    full_script_sent(full_script)
+    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
+    full_script_sent(FULL_SCRIPT_CLEAN)
 if '-a' in ops:
-    full_script, chars = scrap_titanic()
-    along_script_sent(full_script)
+    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
+    along_script_sent(FULL_SCRIPT_CLEAN)
+if '-c' in ops:
+    FULL_SCRIPT, CHARS = scrap_titanic()
+    CHARS_TEXT = ''.join(CHARS[ops.get('-c')])
+    CHARS_CLEAN = cleaning_data(CHARS_TEXT)
+    along_char_sent(CHARS_CLEAN)
