@@ -92,20 +92,19 @@ def full_script_sent(full_script):
 # Score do filme ao longo do tempo
 
 def along_script_sent(full_script):
-    num_blocks = 500
-    block_scores = []
-    block_size = int(len(full_script) / num_blocks)
-    nltk_sentiment = SentimentIntensityAnalyzer()
-    for i in range(num_blocks-1):
-      curr_block = full_script[i*block_size:(i+1)*block_size]
-      block_score = nltk_sentiment.polarity_scores(curr_block)
-      block_scores.append(block_score.get('compound'))
-    curr_block = full_script[i*block_size:]
-    block_score = nltk_sentiment.polarity_scores(curr_block)
-    block_scores.append(block_score.get('compound'))
+    full_script = re.sub(r'\n[^\n]', r'', full_script)
+    full_script = re.sub(r'\n\n', r'\n', full_script)
+    sid = SentimentIntensityAnalyzer()
+    sentences = tokenize.sent_tokenize(full_script)
+    scores = []
+    for sentence in sentences:
+        print(sentence)
+        ss = sid.polarity_scores(sentence)
+        if (ss.get('compound') != 0.0):
+            scores.append(ss.get('compound'))
 
-    x = np.arange(0, num_blocks)
-    y = block_scores
+    x = np.arange(0, len(scores))
+    y = scores
 
     fit = np.polyfit(x, y, 1)
     fit_fn = np.poly1d(fit)
@@ -113,17 +112,39 @@ def along_script_sent(full_script):
     plt.plot(x, y, 'yo', x, fit_fn(x), '--k')
     plt.ylabel('< negativo ---- positivo >')
     plt.show()
+    # num_blocks = 500
+    # block_scores = []
+    # block_size = int(len(full_script) / num_blocks)
+    # nltk_sentiment = SentimentIntensityAnalyzer()
+    # for i in range(num_blocks-1):
+        # curr_block = full_script[i*block_size:(i+1)*block_size]
+        # block_score = nltk_sentiment.polarity_scores(curr_block)
+        # block_scores.append(block_score.get('compound'))
+    # curr_block = full_script[i*block_size:]
+    # block_score = nltk_sentiment.polarity_scores(curr_block)
+    # block_scores.append(block_score.get('compound'))
+
+    # x = np.arange(0, num_blocks)
+    # y = block_scores
+
+    # fit = np.polyfit(x, y, 1)
+    # fit_fn = np.poly1d(fit)
+
+    # plt.plot(x, y, 'yo', x, fit_fn(x), '--k')
+    # plt.ylabel('< negativo ---- positivo >')
+    # plt.show()
 
 
-def scrap_titanic_():
+def scrap_titanic():
     page = requests.get("https://www.imsdb.com/scripts/Titanic.html")
-    soup = BeautifulSoup(page.text, "html.parser")
+    page_text = page.text
+    soup = BeautifulSoup(page_text, "html.parser")
     full_script = ''
     pers = dict()
     name = None
     for child in soup.pre.children:
+        # Nome das personagens
         if not re.match(r'<b>\s*TRANSITION:?\n</b>', str(child)):
-            # Nome das personagens
             if re.search(r'<b>\s+\w+(\s*\(.*\))?\n', str(child)):
                 name = child.string.strip()
                 name = re.sub(r'\s*\(.*\)', '', name)
@@ -140,18 +161,10 @@ def scrap_titanic_():
                 pers[name].append(child.string)
             else:
                 full_script += child.string
+        # Quando for TRANSITION
         else:
             name = None
     return full_script, pers
-
-def scrap_titanic():
-    page = requests.get("https://www.imsdb.com/scripts/Titanic.html")
-    soup = BeautifulSoup(page.text, "html.parser")
-    full_script = ''
-    for child in soup.pre.children:
-        if not re.search(r'<b>', str(child)):
-            full_script += child.string
-    return full_script
 
 def cleaning_data(text):
     text = text.lower()
@@ -206,9 +219,10 @@ if '-t' in ops:
     curr_block = FULL_SCRIPT_CLEAN[i*block_size:]
     top_words(curr_block, CHARS, str(i+1))
 if '-a' in ops:
-    FULL_SCRIPT = scrap_titanic_full_script()
+    FULL_SCRIPT, CHARS = scrap_titanic()
     FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
-    along_script_sent(FULL_SCRIPT_CLEAN)
+    # print(FULL_SCRIPT)
+    along_script_sent(FULL_SCRIPT)
 if '-c' in ops:
     FULL_SCRIPT, CHARS = scrap_titanic()
     CHARS_TEXT = ''.join(CHARS[ops.get('-c')])
