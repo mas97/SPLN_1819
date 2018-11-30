@@ -7,13 +7,13 @@ import re
 import string
 import matplotlib.pyplot as plt
 import numpy as np
+import fileinput
+from imdb import IMDb
 from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from nltk import tokenize
-from sklearn.feature_extraction import text
-from wordcloud import WordCloud
+#from sklearn.feature_extraction import text
 
-opts, args = getopt.getopt(sys.argv[1:], 'bpftac:')
+opts, args = getopt.getopt(sys.argv[1:], 'bsac')
 ops = dict(opts)
 
 def build():
@@ -45,53 +45,37 @@ def build():
     file.write(res)
     file.close()
 
-# Scores por personagem
-def scores_pers(characters):
-    scores = []
-    for k in characters.keys():
-        speech = ''
-        for sent in characters[k]:
-            speech += sent
-        nltk_sentiment = SentimentIntensityAnalyzer()
-        score = nltk_sentiment.polarity_scores(speech)
-        scores.append((k, str(score.get('compound'))))
+def build_movies_db():
+    movies_db = dict()
+    for url in fileinput.input(args):
+        match = re.search(r'/(\w+(?:-\w+)*)\.html', url)
+        if match:
+            key = re.sub(r'-', r' ', match.group(1))
+            key = key.lower()
+            movies_db[key] = url.strip()
+    return movies_db
 
-    sorted_scores = sorted(scores, key=lambda x: x[1])
-    for (char, score) in sorted_scores:
-        print(char + ': ' + score)
-
-# Score do filme ao longo do tempo
-def along_char_sent(full_char_script):
-    N = 60
-    block_scores = []
-    total = len(full_char_script)
-    block_size = int(len(full_char_script) / N)
-    nltk_sentiment = SentimentIntensityAnalyzer()
-    for i in range(N-1):
-        block_score = nltk_sentiment.polarity_scores(full_char_script[i*block_size:(i+1)*block_size])
-        block_scores.append(block_score.get('compound'))
-    block_score = nltk_sentiment.polarity_scores(full_char_script[i*block_size:])
-    block_scores.append(block_score.get('compound'))
-
-    x = np.arange(0, N)
-    y = block_scores
-
-    fit = np.polyfit(x, y, 1)
-    fit_fn = np.poly1d(fit)
-
-    plt.plot(x, y, 'yo', x, fit_fn(x), '--k')
-    plt.ylabel('< negativo ---- positivo >')
-    plt.show()
-
-# Score do filme
-def full_script_sent(full_script):
-    nltk_sentiment = SentimentIntensityAnalyzer()
-    full_movie_score = nltk_sentiment.polarity_scores(full_script)
-    print(full_movie_score)
-
-# Score do filme ao longo do tempo
+def get_movie_url(movies_db):
+    movie = input('Nome do filme: ')
+    movie = movie.lower()
+    search_result = []
+    for m, url in movies_db.items():
+        match = re.search(movie, m)
+        if match:
+            search_result.append(m)
+    if len(search_result) > 1:
+        for val, res in enumerate(search_result):
+            print(str(val) + ": " + res)
+        id_movie = input('ID do filme: ')
+        return movies_db.get(search_result[int(id_movie)])
+    elif len(search_result) == 1:
+        return movies_db.get(search_result[0])
+    else:
+        return ''
 
 def along_script_sent(full_script):
+    """Realiza um gráfico com os valores do sentimento
+       ao longo do filme passado por argumento."""
     num_blocks = 500
     block_scores = []
     block_size = int(len(full_script) / num_blocks)
@@ -106,46 +90,36 @@ def along_script_sent(full_script):
 
     x = np.arange(0, num_blocks)
     y = block_scores
-
-    fit = np.polyfit(x, y, 1)
-    fit_fn = np.poly1d(fit)
-
-    plt.plot(x, y, 'yo', x, fit_fn(x), '--k')
+    plt.scatter(x, y)
+    z = np.polyfit(x, y, 1)
+    p = np.poly1d(z)
+    plt.plot(x, p(x), "r--")
     plt.ylabel('< negativo ---- positivo >')
     plt.show()
 
 
-def scrap_titanic_():
-    page = requests.get("https://www.imsdb.com/scripts/Titanic.html")
+def get_characters(url):
+    """Dado um url de um filme do site IMSDb,
+       devolve um dicionário em que a chave é o
+       nome de uma personagem e o valor é uma lista
+       com as falas dessa personagem."""
+    page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     full_script = ''
-    pers = dict()
-    name = None
+    chars = set()
     for child in soup.pre.children:
         if not re.match(r'<b>\s*TRANSITION:?\n</b>', str(child)):
             # Nome das personagens
-            if re.search(r'<b>\s+\w+(\s*\(.*\))?\n', str(child)):
+            match = re.search(r'<b>\s+[a-zA-Z0-9]+(( [a-zA-Z0-9]+)?){,2}(\s*\(.*\))?\s*\n(</b>)?', str(child))
+            if match:
                 name = child.string.strip()
                 name = re.sub(r'\s*\(.*\)', '', name)
-                if not name in pers:
-                    pers[name] = []
-            # Tag das cenas
-            elif re.match(r'<b>\w+', str(child)):
-                name = None
-            # Tag da direita
-            elif re.search(r'\s+\w+:\n</b>', str(child)):
-                name = None
-            elif name:
-                full_script += child.string
-                pers[name].append(child.string)
-            else:
-                full_script += child.string
-        else:
-            name = None
-    return full_script, pers
+                chars.add(name)
+    return chars
 
-def scrap_titanic():
-    page = requests.get("https://www.imsdb.com/scripts/Titanic.html")
+def scrap_full_script(url):
+    """Obtém o script de um filme dado o seu url."""
+    page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     full_script = ''
     for child in soup.pre.children:
@@ -154,6 +128,7 @@ def scrap_titanic():
     return full_script
 
 def cleaning_data(text):
+    """Realiza o tratamento dos dados."""
     text = text.lower()
     text = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', text)
     text = re.sub(r'\w*\d\w*', ' ', text)
@@ -161,56 +136,49 @@ def cleaning_data(text):
     text = re.sub(r'\s+', ' ', text)
     return text
 
-def top_words(block_script, chars, prefix):
-    chars_names = [c.lower() for c in chars.keys()]
-    stopwords = set()
-    top_dict = dict()
-    for w in block_script.split():
-        if w in text.ENGLISH_STOP_WORDS or len(w) < 3 or w in chars_names:
-            stopwords.update([w])
-        elif w in top_dict:
-            top_dict[w] += 1
-        else:
-            top_dict[w] = 1
-    sorted_top = sorted(top_dict.items(), key=lambda x: x[1])
-    for w in sorted_top[-5:]:
-        stopwords.update([w[0]])
-    wc = WordCloud(stopwords=stopwords, background_color="white", colormap="Dark2", max_font_size=150, random_state=42, width=1000, height=600)
-    wordcloud = wc.generate(block_script)
-    wordcloud.to_file(prefix + "_block.png")
-    # plt.imshow(wordcloud, interpolation='bilinear')
-    # plt.axis("off")
-    # plt.show()
-
+def info_movie(url):
+    """Imprime para o ecrã um pequeno sumário do filme
+       dado pelo argumento url"""
+    soup = BeautifulSoup(requests.get(url).text, "html.parser")
+    print('Título: ' + soup.find('h1').contents[0])
+    info = soup.find('div', class_='subtext')
+    print('Restrição de idade: ' + info.contents[0].strip())
+    try: print('Duração: ' + info.time.string.strip())
+    except AttributeError: pass
+    print('Géneros: ' + ', '.join([g.string for g in info.findAll('a')[:-1]]))
+    print('Data de estreia: ' + info.findAll('a')[-1].string)
 
 
 if '-b' in ops:
     build()
-if '-p' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
-    for k, v in CHARS.items():
-        CHARS[k] = cleaning_data(''.join(v))
-    scores_pers(CHARS)
-if '-f' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
-    FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
-    full_script_sent(FULL_SCRIPT_CLEAN)
-if '-t' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
-    FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
-    num_blocks = 3
-    block_size = int(len(FULL_SCRIPT_CLEAN) / num_blocks)
-    for i in range(num_blocks-1):
-        curr_block = FULL_SCRIPT_CLEAN[i*block_size:(i+1)*block_size]
-        top_words(curr_block, CHARS, str(i))
-    curr_block = FULL_SCRIPT_CLEAN[i*block_size:]
-    top_words(curr_block, CHARS, str(i+1))
+
+if '-s' in ops:
+    movie = input('Nome do filme: ')
+    ia = IMDb()
+    results = ia.search_movie(movie)
+    mv = results[0]
+    URL = ia.get_imdbURL(mv)
+    info_movie(URL)
+
 if '-a' in ops:
-    FULL_SCRIPT = scrap_titanic_full_script()
-    FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
-    along_script_sent(FULL_SCRIPT_CLEAN)
+    movies_db = build_movies_db()
+    choosen_movie = get_movie_url(movies_db)
+    if choosen_movie:
+        FULL_SCRIPT = scrap_full_script(choosen_movie)
+        FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
+        along_script_sent(FULL_SCRIPT_CLEAN)
+    else:
+        print('Não foram encontrados resultados.')
+
 if '-c' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
-    CHARS_TEXT = ''.join(CHARS[ops.get('-c')])
-    CHARS_CLEAN = cleaning_data(CHARS_TEXT)
-    along_char_sent(CHARS_CLEAN)
+    movies_db = build_movies_db()
+    choosen_movie = get_movie_url(movies_db)
+    if choosen_movie:
+        CHARS = get_characters(choosen_movie)
+        if CHARS:
+            for char in sorted(CHARS):
+                print(char)
+        else:
+            print('Não foram encontradas personagens.')
+    else:
+        print('Não foram encontrados resultados.')
