@@ -11,9 +11,8 @@ import fileinput
 from imdb import IMDb
 from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-#from sklearn.feature_extraction import text
 
-opts, args = getopt.getopt(sys.argv[1:], 'bsac')
+opts, args = getopt.getopt(sys.argv[1:], 'hbsac')
 ops = dict(opts)
 
 def build():
@@ -23,31 +22,25 @@ def build():
     names_pages = []
 
     #reunião de todas as páginas de nomes de filmes
-    for i in range(0, 27):
-        print("Getting " + "https://www.imsdb.com/alphabetical/" + alphabet[i])
-        request = requests.get("https://www.imsdb.com/alphabetical/" + alphabet[i])
+    for c in alphabet:
+        print("Getting " + "https://www.imsdb.com/alphabetical/" + c)
+        request = requests.get("https://www.imsdb.com/alphabetical/" + c)
         names_pages.append(request)
-    res = ""
     for page in names_pages:
-        html = page.text
-        page_soup = BeautifulSoup(html, "html.parser")
+        page_soup = BeautifulSoup(page.text, "html.parser")
         results = page_soup.find_all('a')
-        aux = []
+        file = open("films_names", "a")
         for result in results:
-            if len(result.attrs) == 2 and result.text != "":
-                aux.append(result.text)
-        aux = aux[:-5]
-        for name in aux:
-            name = name.replace(' ', '-')
-            name = name.replace(':', '')
-            res = res + 'https://www.imsdb.com/scripts/' + name + '.html' + '\n'
-    file = open("films_names", "w")
-    file.write(res)
-    file.close()
+            if re.search(r'<p>', str(result.parent)) and 'href' in result.attrs and 'title' in result.attrs:
+                title = result.text.replace(' ', '-')
+                title = title.replace(':', '')
+                url = 'https://www.imsdb.com/scripts/' + title + '.html' + '\n'
+                file.write(url)
+        file.close()
 
 def build_movies_db():
     movies_db = dict()
-    for url in fileinput.input(args):
+    for url in fileinput.input("films_names"):
         match = re.search(r'/(\w+(?:-\w+)*)\.html', url)
         if match:
             key = re.sub(r'-', r' ', match.group(1))
@@ -182,3 +175,12 @@ if '-c' in ops:
             print('Não foram encontradas personagens.')
     else:
         print('Não foram encontrados resultados.')
+
+if '-h' in ops:
+    print("""Uso: python bs.py [OPTION]
+Opções:
+    -b      Permite carregar todos os filmes do site IMSDb.
+    -a      Permite analisar o sentimento ao longo de um filme. Só pode ser usada depois da opção -b.
+    -s      Permite pesquisar informações sobre um dado filme.
+    -c      Permite listar as personagens de um dado filme. Só pode ser usada depois da opção -b.""")
+
