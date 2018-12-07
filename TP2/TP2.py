@@ -187,16 +187,16 @@ def top_words(block_script, chars, prefix):
 if '-b' in ops:
     build()
 if '-p' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT, CHARS = scrap_titanic_()
     for k, v in CHARS.items():
         CHARS[k] = cleaning_data(''.join(v))
     scores_pers(CHARS)
 if '-f' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT, CHARS = scrap_titanic_()
     FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
     full_script_sent(FULL_SCRIPT_CLEAN)
 if '-t' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT, CHARS = scrap_titanic_()
     FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
     num_blocks = 3
     block_size = int(len(FULL_SCRIPT_CLEAN) / num_blocks)
@@ -206,11 +206,11 @@ if '-t' in ops:
     curr_block = FULL_SCRIPT_CLEAN[i*block_size:]
     top_words(curr_block, CHARS, str(i+1))
 if '-a' in ops:
-    FULL_SCRIPT = scrap_titanic_full_script()
+    FULL_SCRIPT = scrap_titanic()
     FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
     along_script_sent(FULL_SCRIPT_CLEAN)
 if '-c' in ops:
-    FULL_SCRIPT, CHARS = scrap_titanic()
+    FULL_SCRIPT, CHARS = scrap_titanic_()
     CHARS_TEXT = ''.join(CHARS[ops.get('-c')])
     CHARS_CLEAN = cleaning_data(CHARS_TEXT)
     along_char_sent(CHARS_CLEAN)
