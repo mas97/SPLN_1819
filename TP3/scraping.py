@@ -89,6 +89,7 @@ top.location.href=location.href
     text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
     text = text.lower()
     text = text.replace(r'\r', '')
+    text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
 def scrap_full_script(url):
