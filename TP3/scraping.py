@@ -114,12 +114,11 @@ def save_full_scripts(list_urls):
             full_script = scrap_full_script(url)
             match = re.search(r'scripts/(.*?)\.html', url)
             if match:
-                words_from_movies[match.group(1)] = re.split(r'\s+', full_script)
+                words_from_movies[match.group(1)] = full_script
             print('[' + str(i) + '/' + str(size) + '] ' + match.group(1))
         except IndexError:
             match = re.search(r'scripts/(.*?)\.html', url)
             print('[' + str(i) + '/' + str(size) + '] ' + match.group(1) + ' [NO SCRIPT]')
-
     print('Saving to file...')
     save_obj(words_from_movies, 'dict_movies_list_words')
 
