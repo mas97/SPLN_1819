@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import time
+import pickle
 import sys
 import getopt
 import requests
@@ -12,14 +14,15 @@ from imdb import IMDb
 from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-opts, args = getopt.getopt(sys.argv[1:], 'hbsac')
+opts, args = getopt.getopt(sys.argv[1:], 'hbl')
 ops = dict(opts)
 
-def build():
+def get_movies_url():
     """Coloca em ficheiro todos os filmes presentes no site: www.imsdb.com"""
 
     alphabet = "0ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     names_pages = []
+    list_urls = []
 
     #reunião de todas as páginas de nomes de filmes
     for c in alphabet:
@@ -29,42 +32,23 @@ def build():
     for page in names_pages:
         page_soup = BeautifulSoup(page.text, "html.parser")
         results = page_soup.find_all('a')
-        file = open("films_names", "a")
         for result in results:
             if re.search(r'<p>', str(result.parent)) and 'href' in result.attrs and 'title' in result.attrs:
                 title = result.text.replace(' ', '-')
                 title = title.replace(':', '')
                 url = 'https://www.imsdb.com/scripts/' + title + '.html' + '\n'
-                file.write(url)
-        file.close()
+                list_urls.append(url.strip())
+    return list_urls
 
-def build_movies_db():
+def build_movies_db(list_urls):
     movies_db = dict()
-    for url in fileinput.input("films_names"):
-        match = re.search(r'/(\w+(?:-\w+)*)\.html', url)
+    for url in list_urls:
+        match = re.search(r'scripts/(.*?)\.html', url)
         if match:
             key = re.sub(r'-', r' ', match.group(1))
             key = key.lower()
             movies_db[key] = url.strip()
     return movies_db
-
-def get_movie_url(movies_db):
-    movie = input('Nome do filme: ')
-    movie = movie.lower()
-    search_result = []
-    for m, url in movies_db.items():
-        match = re.search(movie, m)
-        if match:
-            search_result.append(m)
-    if len(search_result) > 1:
-        for val, res in enumerate(search_result):
-            print(str(val) + ": " + res)
-        id_movie = input('ID do filme: ')
-        return movies_db.get(search_result[int(id_movie)])
-    elif len(search_result) == 1:
-        return movies_db.get(search_result[0])
-    else:
-        return ''
 
 def along_script_sent(full_script):
     """Realiza um gráfico com os valores do sentimento
@@ -91,90 +75,62 @@ def along_script_sent(full_script):
     plt.show()
 
 
-def get_characters(url):
-    """Dado um url de um filme do site IMSDb,
-       devolve um dicionário em que a chave é o
-       nome de uma personagem e o valor é uma lista
-       com as falas dessa personagem."""
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text, "html.parser")
-    full_script = ''
-    chars = set()
-    for child in soup.pre.children:
-        if not re.match(r'<b>\s*TRANSITION:?\n</b>', str(child)):
-            # Nome das personagens
-            match = re.search(r'<b>\s+[a-zA-Z0-9]+(( [a-zA-Z0-9]+)?){,2}(\s*\(.*\))?\s*\n(</b>)?', str(child))
-            if match:
-                name = child.string.strip()
-                name = re.sub(r'\s*\(.*\)', '', name)
-                chars.add(name)
-    return chars
+def clean_script(text):
+    text = text.replace('Back to IMSDb', '')
+    text = text.replace('''<b><!--
+</b>if (window!= top)
+top.location.href=location.href
+<b>// -->
+</b>
+''', '')
+    text = text.replace('''          Scanned by http://freemoviescripts.com
+          Formatting by http://simplyscripts.home.att.net
+''', '')
+    text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
+    text = text.lower()
+    text = text.replace(r'\r', '')
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
 
 def scrap_full_script(url):
     """Obtém o script de um filme dado o seu url."""
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text, "html.parser")
-    full_script = ''
-    for child in soup.pre.children:
-        if not re.search(r'<b>', str(child)):
-            full_script += child.string
-    return full_script
-
-def cleaning_data(text):
-    """Realiza o tratamento dos dados."""
-    text = text.lower()
-    text = re.sub(r'[%s]' % re.escape(string.punctuation), ' ', text)
-    text = re.sub(r'\w*\d\w*', ' ', text)
-    text = re.sub(r'[‘’“”…]', ' ', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text
-
-def info_movie(url):
-    """Imprime para o ecrã um pequeno sumário do filme
-       dado pelo argumento url"""
     soup = BeautifulSoup(requests.get(url).text, "html.parser")
-    print('Título: ' + soup.find('h1').contents[0])
-    info = soup.find('div', class_='subtext')
-    print('Restrição de idade: ' + info.contents[0].strip())
-    try: print('Duração: ' + info.time.string.strip())
-    except AttributeError: pass
-    print('Géneros: ' + ', '.join([g.string for g in info.findAll('a')[:-1]]))
-    print('Data de estreia: ' + info.findAll('a')[-1].string)
+    full_script = soup.find_all('td', {'class': "scrtext"})[0].get_text()
+    return clean_script(full_script)
 
+def save_obj(obj, name):
+    with open(name + '.pkl', 'wb') as fp:
+        pickle.dump(obj, fp, pickle.HIGHEST_PROTOCOL)
+
+def load_obj(name):
+    with open(name + '.pkl', 'rb') as fp:
+        return pickle.load(fp)
+
+def save_full_scripts(list_urls):
+    words_from_movies = {}
+    size = len(list_urls)
+    for i, url in enumerate(list_urls, start=1):
+        time.sleep(3)
+        try:
+            full_script = scrap_full_script(url)
+            match = re.search(r'scripts/(.*?)\.html', url)
+            if match:
+                words_from_movies[match.group(1)] = full_script
+            print('[' + str(i) + '/' + str(size) + '] ' + match.group(1))
+        except IndexError:
+            match = re.search(r'scripts/(.*?)\.html', url)
+            print('[' + str(i) + '/' + str(size) + '] ' + match.group(1) + ' [NO SCRIPT]')
+    print('Saving to file...')
+    save_obj(words_from_movies, 'dict_movies_list_words')
 
 if '-b' in ops:
-    build()
+    list_urls = get_movies_url()
+    save_full_scripts(list_urls)
+    print('Done!')
 
-if '-s' in ops:
-    movie = input('Nome do filme: ')
-    ia = IMDb()
-    results = ia.search_movie(movie)
-    mv = results[0]
-    URL = ia.get_imdbURL(mv)
-    info_movie(URL)
-
-if '-a' in ops:
-    movies_db = build_movies_db()
-    choosen_movie = get_movie_url(movies_db)
-    if choosen_movie:
-        FULL_SCRIPT = scrap_full_script(choosen_movie)
-        FULL_SCRIPT_CLEAN = cleaning_data(FULL_SCRIPT)
-        along_script_sent(FULL_SCRIPT_CLEAN)
-    else:
-        print('Não foram encontrados resultados.')
-
-if '-c' in ops:
-    movies_db = build_movies_db()
-    choosen_movie = get_movie_url(movies_db)
-    if choosen_movie:
-        CHARS = get_characters(choosen_movie)
-        if CHARS:
-            for char in sorted(CHARS):
-                print(char)
-        else:
-            print('Não foram encontradas personagens.')
-    else:
-        print('Não foram encontrados resultados.')
+if '-l' in ops:
+    words_from_movies = load_obj('dict_movies_list_words')
+    # fazer coisas com o dicionário
 
 if '-h' in ops:
     print("""Uso: python bs.py [OPTION]
