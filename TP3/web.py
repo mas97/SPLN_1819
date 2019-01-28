@@ -1,6 +1,6 @@
 from flask import Flask, render_template, url_for, request
 from imdb import IMDb
-
+from tf_idf import match
 
 
 app = Flask(__name__)
@@ -17,9 +17,8 @@ def getMovie():
 
     movies = IMDb_access.search_movie(movie_name)
     movie_infos = IMDb_access.get_movie(movies[0].getID())
-
     html_info = {}
-
+    
     directors = movie_infos['directors']
     directors_names = []
     for director in directors:
@@ -38,6 +37,8 @@ def getMovie():
     for key in movie_infos.keys():
         print(key)
 
+    match(movie_infos['title'])
+    
     return render_template('movie.html', movie_name = movie_infos['title'], html_infos = html_info, cover_url = movie_infos['full-size cover url'])
 
 if __name__ == '__main__':
