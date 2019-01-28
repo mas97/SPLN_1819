@@ -35,6 +35,8 @@ def getMovie():
 
     html_info['Rating'] = movie_infos['rating']
 
+    html_info['Genre'] = ', '.join(movie_infos['genre'])
+
     for key in movie_infos.keys():
         print(key)
 
