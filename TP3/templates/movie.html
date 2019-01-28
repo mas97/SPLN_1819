@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 <html dir="ltr" lang="en-US">
-	<head>
+	<head></head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 	<title>SPLN - Movie Suggestion</title>
@@ -14,11 +14,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
     * {box-sizing: border-box;}
-    
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-    }
     
     .topnav {
         overflow: hidden;
@@ -70,6 +65,14 @@
     .topnav .search-container button:hover {
         background: #ccc;
     }
+
+    #movie_info_table {
+        padding-left: 120px
+    }
+
+    #movie_cover {
+        padding-right: 120px
+    }
     
     @media screen and (max-width: 600px) {
         .topnav .search-container {
@@ -97,16 +100,18 @@
         
         <h1>{{movie_name}}</h1>
 
-        <table>
-            {% for key in html_infos.keys() %}
-            <tr>
-                <td> <b> {{ key }} </b> </td>
-                <td> {{ html_infos[key] }} </td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        <img src="{{ cover_url }}" width="300" height="450">
-        
+        <div id="movie_info_table" style="float: left">
+            <table>
+                    {% for key in html_infos.keys() %}
+                    <tr>
+                        <td> <b> {{ key }} </b> </td>
+                        <td> {{ html_infos[key] }} </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+        </div>
+        <div id="movie_cover" style="float: right">
+            <img src="{{ cover_url }}" width="300" height="450">
+        </div>        
     </body>
 </html>
