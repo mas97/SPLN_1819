@@ -101,6 +101,7 @@ def match(movieRequest):
         suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
         print("--SUGGEST--")
         print(suggestFilms[:10])
+        return suggestFilms[:10]
     else :
         print('No film on dataset, try another')
     

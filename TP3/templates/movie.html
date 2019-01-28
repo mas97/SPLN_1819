@@ -117,13 +117,13 @@
 
         <div id="movie_sugestions" style="float: left">
                 <table>
-                        {% for sugestion in sugestions %}
-                        <tr>
-                            <th> Sugestions </th>
-                            <td> {{ sugestion }} </td>
-                        </tr>
-                        {% endfor %}
-                    </table>
+                    <th> Sugestions </th>
+                    {% for sugestion in sugestions %}
+                    <tr>
+                        <td> {{ sugestion }} </td>
+                    </tr>
+                    {% endfor %}
+                </table>
         </div>
         <div id="movie_cover" style="float: right">
             <img src="{{ cover_url }}" width="300" height="450">
