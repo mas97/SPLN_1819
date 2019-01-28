@@ -70,36 +70,41 @@ def buildTFIDF(dict_movies):
     tfidfDict = computeTFIDF(wordDict, tfDict, idfDict)
     return tfidfDict
 
-def orderDict(tfidfDict):
+def orderTFIDFvalues(tfidfDict):
     orderDict = {}
     for movie,words in tfidfDict.items():
         orderDict[movie] = []
         orderDict[movie] = sorted(words.items(), key=itemgetter(1),reverse=True)
     return orderDict
 
-def match(orderDict,movieRequest):
+def match_count(mostImportantWords,aux):
+    mostImportantWordsFirstTuple= [t[0] for t in mostImportantWords]
+    auxFirstTuple = [t[0] for t in aux]
+    equalElem = set(mostImportantWordsFirstTuple) & set(auxFirstTuple)
+    return len(equalElem)
+
+def match(movieRequest):
+    tfidfDict = buildTFIDF(dict) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
+    orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}
+    suggestFilms = []
     if movieRequest in orderDict:
         mostImportantWords= orderDict[movieRequest][:10]
         print("RequestMovie-->")
         print(mostImportantWords)
-        suggestiveFilms= []
         for movie, words in orderDict.items():
             if movieRequest != movie :
                 aux = words[:10]
-                print(movie + '-->')
-                print(aux)
-                if aux == mostImportantWords:
-                    suggestiveFilms.append(movie)
+                #print(movie + '-->')
+                #print(aux)
+                suggestFilms.append((movie,match_count(mostImportantWords,aux)))
+        suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
         print("--SUGGEST--")
-        print(suggestiveFilms)
+        print(suggestFilms[:10])
     else :
         print('No film on dataset, try another')
     
 
-tfidfDict = buildTFIDF(dict2) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
-orderDict = orderDict(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}
-suggestiveFilms = match(orderDict, 'Batman')
-#print(orderDict.keys())
+suggestiveFilms = match('Batman')
 #print(pd.DataFrame(tfidfDict))
 
 
