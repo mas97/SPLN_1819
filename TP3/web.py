@@ -18,6 +18,8 @@ def getMovie():
     movies = IMDb_access.search_movie(movie_name)
     movie_infos = IMDb_access.get_movie(movies[0].getID())
 
+    sugestions = []
+
     html_info = {}
 
     directors = movie_infos['directors']
@@ -40,7 +42,7 @@ def getMovie():
     for key in movie_infos.keys():
         print(key)
 
-    return render_template('movie.html', movie_name = movie_infos['title'], html_infos = html_info, cover_url = movie_infos['full-size cover url'])
+    return render_template('movie.html', movie_name = movie_infos['title'], html_infos = html_info, cover_url = movie_infos['full-size cover url'], sugestions = sugestions)
 
 if __name__ == '__main__':
    app.run()
