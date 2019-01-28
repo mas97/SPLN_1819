@@ -6,13 +6,16 @@
 import pickle
 import math
 import pandas as pd
+from operator import itemgetter
 
 def load_obj(name):
     with open(name + '.pkl', 'rb') as fp:
         return pickle.load(fp)
 
 dict = load_obj("dict_movies_list_words")
-dict2 = {k: ' '.join(dict[k]) for k in list(dict)[:3]}
+dict2 = {k: dict[k] for k in list(dict)[:500]}
+
+testDict = {'docA' :"The cat sat on my", 'docB' :"The dog sat on my bed"}
 
 def buildWordCountDict(dict_movies):
     dict = {}
@@ -67,11 +70,37 @@ def buildTFIDF(dict_movies):
     tfidfDict = computeTFIDF(wordDict, tfDict, idfDict)
     return tfidfDict
 
+def orderDict(tfidfDict):
+    orderDict = {}
+    for movie,words in tfidfDict.items():
+        orderDict[movie] = []
+        orderDict[movie] = sorted(words.items(), key=itemgetter(1),reverse=True)
+    return orderDict
 
-testDict = {'docA' :"The cat sat on my face", 'docB' :"The dog sat on my bed"}
-tfidfDict = buildTFIDF(testDict)
-print(pd.DataFrame(tfidfDict))
+def match(orderDict,movieRequest):
+    if movieRequest in orderDict:
+        mostImportantWords= orderDict[movieRequest][:10]
+        print("RequestMovie-->")
+        print(mostImportantWords)
+        suggestiveFilms= []
+        for movie, words in orderDict.items():
+            if movieRequest != movie :
+                aux = words[:10]
+                print(movie + '-->')
+                print(aux)
+                if aux == mostImportantWords:
+                    suggestiveFilms.append(movie)
+        print("--SUGGEST--")
+        print(suggestiveFilms)
+    else :
+        print('No film on dataset, try another')
+    
 
+tfidfDict = buildTFIDF(dict2) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
+orderDict = orderDict(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}
+suggestiveFilms = match(orderDict, 'Batman')
+#print(orderDict.keys())
+#print(pd.DataFrame(tfidfDict))
 
 
 
