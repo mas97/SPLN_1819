@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import time
 import pickle
 import sys
 import getopt
@@ -10,9 +9,11 @@ import string
 import matplotlib.pyplot as plt
 import numpy as np
 import fileinput
+from time import sleep
 from imdb import IMDb
 from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from pprint import pprint
 
 opts, args = getopt.getopt(sys.argv[1:], 'hbl')
 ops = dict(opts)
@@ -22,7 +23,8 @@ def get_movies_url():
 
     alphabet = "0ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     names_pages = []
-    list_urls = []
+    urls = []
+    titles = []
 
     #reunião de todas as páginas de nomes de filmes
     for c in alphabet:
@@ -34,11 +36,12 @@ def get_movies_url():
         results = page_soup.find_all('a')
         for result in results:
             if re.search(r'<p>', str(result.parent)) and 'href' in result.attrs and 'title' in result.attrs:
+                titles.append(result.text)
                 title = result.text.replace(' ', '-')
                 title = title.replace(':', '')
                 url = 'https://www.imsdb.com/scripts/' + title + '.html' + '\n'
-                list_urls.append(url.strip())
-    return list_urls
+                urls.append(url.strip())
+    return urls, titles
 
 def build_movies_db(list_urls):
     movies_db = dict()
@@ -108,21 +111,27 @@ def load_obj(name):
     with open(name + '.pkl', 'rb') as fp:
         return pickle.load(fp)
 
-def fix_title(title):
-    match = re.search(r',-The$', title)
+def sub_in_title(title, prefix):
+    match = re.search(r',-%s$' % prefix, title)
     if match:
-        title = re.sub(r',-The$', '', title)
-        title = 'the ' + title
+        title = re.sub(r',-%s$' % prefix, '', title)
+        title = prefix.lower() + ' ' + title
+    return title
+
+
+def fix_title(title):
+    title = re.sub(r' \(The Adventure\)', '', title)
+    title = sub_in_title(title, 'The')
+    title = sub_in_title(title, 'A')
+    title = sub_in_title(title, "L'")
     title = re.sub(r'-', ' ', title)
     return title.lower()
 
 def save_full_scripts(list_urls):
     words_from_movies = {}
-    genres_from_movies = {}
-    IMDb_access = IMDb()
     size = len(list_urls)
     for i, url in enumerate(list_urls, start=1):
-        time.sleep(1)
+        sleep(1)
         try:
             full_script = scrap_full_script(url)
             match = re.search(r'scripts/(.*?)\.html', url)
@@ -132,10 +141,6 @@ def save_full_scripts(list_urls):
                     along_script_sent(title, full_script)
                     # Map: title -> list of words
                     words_from_movies[title] = full_script
-                    # Map: title -> list of genres
-                    movies = IMDb_access.search_movie(title)
-                    movie_infos = IMDb_access.get_movie(movies[0].getID())
-                    genres_from_movies[title] = movie_infos['genre']
                     print('[' + str(i) + '/' + str(size) + '] ' + title)
                 else:
                     print('[' + str(i) + '/' + str(size) + '] ' + title + ' [SMALL SCRIPT]')
@@ -147,17 +152,37 @@ def save_full_scripts(list_urls):
             print('[' + str(i) + '/' + str(size) + '] ' + title + ' [NO SCRIPT]')
     print('Saving words_from_movies to file...')
     save_obj(words_from_movies, 'dict_movies_list_words')
+
+def save_genres(titles):
+    genres_from_movies = {}
+    for title in titles:
+        sleep(1)
+        print('Getting genres: ' + title)
+        request = requests.get('https://www.imsdb.com/Movie%20Scripts/' +\
+                                title + ' Script.html')
+        soup = BeautifulSoup(request.text, "html.parser")
+        script_details = soup.find_all('table', {'class': "script-details"})[0]
+        links = script_details.find_all('a')
+        for link in links:
+            href = link['href']
+            match = re.match(r'/genre/(.*)', href)
+            if match:
+                title = title.replace(' ', '-')
+                title = title.replace(':', '')
+                title = fix_title(title)
+                if title not in genres_from_movies:
+                    genres_from_movies[title] = []
+                genres_from_movies[title].append(match.group(1))
     print('Saving genres_from_movies to file...')
     save_obj(genres_from_movies, 'dict_movies_list_genres')
 
-if '-b' in ops:
-    list_urls = get_movies_url()
-    save_full_scripts(list_urls)
-    print('Done!')
+            
 
-if '-l' in ops:
-    words_from_movies = load_obj('dict_movies_list_words')
-    # fazer coisas com o dicionário
+if '-b' in ops:
+    urls, titles = get_movies_url()
+    save_genres(titles)
+    save_full_scripts(urls)
+    print('Done!')
 
 if '-h' in ops:
     print("""Uso: python bs.py [OPTION]
