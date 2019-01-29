@@ -23,26 +23,35 @@ def getMovie():
     if movies != []:
         movie_infos = IMDb_access.get_movie(movies[0].getID())
         
-        directors = movie_infos['directors']
         directors_names = []
-        for director in directors:
-            directors_names.append(director['name'])
+        if 'directors' in movie_infos:
+            directors = movie_infos['directors']
+            directors_names = []
+            for director in directors:
+                directors_names.append(director['name'])
 
         html_info['Directors'] = ', '.join(directors_names)
 
-        html_info['Languages'] = ', '.join(movie_infos['languages'])
+        if 'languages' in movie_infos:
+            html_info['Languages'] = ', '.join(movie_infos['languages'])
 
-        html_info['Year'] = movie_infos['year']
+        if 'year' in movie_infos:
+            html_info['Year'] = movie_infos['year']
 
-        html_info['Kind'] = movie_infos['kind']
+        if 'kind' in movie_infos:
+            html_info['Kind'] = movie_infos['kind']
 
-        html_info['Rating'] = movie_infos['rating']
+        if 'rating' in movie_infos:
+            html_info['Rating'] = movie_infos['rating']
 
-        html_info['Genre'] = ', '.join(movie_infos['genre'])
+        if 'genre' in movie_infos:
+            html_info['Genre'] = ', '.join(movie_infos['genre'])
 
         sugestions = match(movie_infos['title'].lower())
 
-        movie_name = movie_infos['title']
+        movie_name = []
+        if 'title' in movie_infos:
+            movie_name = movie_infos['title']
 
         cover_url = movie_infos['full-size cover url']
     else:
