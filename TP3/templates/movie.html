@@ -67,15 +67,16 @@
     }
 
     #movie_info_table {
-        padding-left: 120px
+        padding-left: 120px;
     }
 
     #movie_sugestions {
-        padding-left: 120px
+        padding-top: 320px;
+        padding-left: 120px;
     }
 
     #movie_cover {
-        padding-right: 120px
+        padding-right: 120px;
     }
     
     @media screen and (max-width: 600px) {
@@ -114,19 +115,23 @@
                     {% endfor %}
                 </table>
         </div>
+        <div id="movie_cover" style="float: right">
+            <img src="{{ cover_url }}" alt="Cover image not available" width="300" height="450">
+        </div>
 
         <div id="movie_sugestions" style="float: left">
                 <table>
                     <th> Sugestions </th>
+                    <th> Genre </th>
+                    <th> Sentiment Analysis </th>
                     {% for sugestion in sugestions %}
                     <tr>
-                        <td> {{ sugestion }} </td>
+                        <td> {{ sugestion[0] }} </td>
+                        <td> {{ ', '.join(sugestion[1]) }} </td>
+                        <td> <a href="{{ cover_url }}" target="_blank"> <img src="{{ cover_url }}"  alt="Sentiment Analysis not available" width="100" height="100" /></a> </td>
                     </tr>
                     {% endfor %}
                 </table>
-        </div>
-        <div id="movie_cover" style="float: right">
-            <img src="{{ cover_url }}" width="300" height="450">
-        </div>        
+        </div>     
     </body>
 </html>
