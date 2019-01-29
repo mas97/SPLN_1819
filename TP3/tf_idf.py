@@ -7,16 +7,10 @@ import pickle
 import math
 import pandas as pd
 from operator import itemgetter
+from scraping import save_obj,load_obj,get_movies_url,save_full_scripts
 
-def load_obj(name):
-    with open(name + '.pkl', 'rb') as fp:
-        return pickle.load(fp)
-
-dict = load_obj("dict_movies_list_words")
-dict2 = {k: dict[k] for k in list(dict)[:500]}
-
-testDict = {'docA' :"The cat sat on my", 'docB' :"The dog sat on my bed"}
-
+#testDict = {'docA' :"The cat sat on my", 'docB' :"The dog sat on my bed"}
+nFilms = 10
 def buildWordCountDict(dict_movies):
     dict = {}
     for movie,words in dict_movies.items():
@@ -77,36 +71,70 @@ def orderTFIDFvalues(tfidfDict):
         orderDict[movie] = sorted(words.items(), key=itemgetter(1),reverse=True)
     return orderDict
 
-def match_count(mostImportantWords,aux):
+def match_count(mostImportantWords,movieWords):
     mostImportantWordsFirstTuple= [t[0] for t in mostImportantWords]
-    auxFirstTuple = [t[0] for t in aux]
-    equalElem = set(mostImportantWordsFirstTuple) & set(auxFirstTuple)
+    movieWordsFirstTuple = [t[0] for t in movieWords]
+    equalElem = set(mostImportantWordsFirstTuple) & set(movieWordsFirstTuple)
     return len(equalElem)
 
+def match_genre_count(suggestFilms,lower_value,movieRequest):
+    match = []
+    for t in suggestFilms[nFilms:]:
+        if t[1]!= lower_value:
+            break
+        else:
+            match.append((t[0],len(set(genresDict[movieRequest]) & set(genresDict[t[0]]))))
+    match = sorted(match, key=lambda tup: tup[1], reverse = True)
+    #for m in match[:10]:
+    #    print(genresDict[m[0]])
+    return match
+
+def genres_ok(suggestFilms, movieRequest):
+    #print(genresDict[movieRequest])
+    lower_value = suggestFilms[nFilms][1]
+    match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
+    for n,t in enumerate(suggestFilms[:nFilms]):
+        if t[1]==lower_value:
+            if match_genre[0][1]>0:
+                suggestFilms[n]=match_genre[0]
+                del match_genre[0]
+    return suggestFilms
+
+
 def match(movieRequest):
-    print(movieRequest)
-    tfidfDict = buildTFIDF(dict) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
-    orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}
+    #print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
         mostImportantWords= orderDict[movieRequest][:25]
-        print("RequestMovie-->")
-        print(mostImportantWords)
         for movie, words in orderDict.items():
             if movieRequest != movie :
-                aux = words[:25]
-                #print(movie + '-->')
-                #print(aux)
-                suggestFilms.append((movie,match_count(mostImportantWords,aux)))
+                movieWords = words[:25]
+                suggestFilms.append((movie,match_count(mostImportantWords,movieWords)))
         suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
-        print("--SUGGEST--")
-        print(suggestFilms[:10])
-        return suggestFilms[:10]
+        print("--SUGGESTÕES ANTES DE TRATAR GENERO--")
+        print(suggestFilms[:nFilms])
+        suggestFilms = genres_ok(suggestFilms,movieRequest)
+        print("--SUGGESTÕES FINAIS--")
+        print(suggestFilms[:nFilms])
+        return suggestFilms[:nFilms]
     else :
         print('No film on dataset, try another')
-    
 
-#suggestiveFilms = match('Titanic')
+try:  
+    filmsDict = load_obj("dict_movies_list_words")
+    genresDict = load_obj("dict_movies_list_genres")
+except Exception:
+    list_urls = get_movies_url()
+    save_full_scripts(list_urls)
+try:
+    orderDict = load_obj("dict_tfidf_movies_order")
+except Exception:
+    tfidfDict = buildTFIDF(filmsDict) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
+    orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
+    save_obj(orderDict,'dict_tfidf_movies_order')
+
+#suggestFilms = match('batman')
+
 #print(pd.DataFrame(tfidfDict))
 
 
