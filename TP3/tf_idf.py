@@ -116,7 +116,11 @@ def match(movieRequest):
         suggestFilms = genres_ok(suggestFilms,movieRequest)
         print("--SUGGESTÕES FINAIS--")
         print(suggestFilms[:nFilms])
-        return suggestFilms[:nFilms]
+        suggestFilmsGenres = []
+        for movie in suggestFilms[:nFilms]:
+            suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
+        print(suggestFilmsGenres)
+        return suggestFilmsGenres
     else :
         print('No film on dataset, try another')
 
@@ -133,7 +137,7 @@ except Exception:
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
 
-#suggestFilms = match('batman')
+suggestFilms = match('batman')
 
 #print(pd.DataFrame(tfidfDict))
 
