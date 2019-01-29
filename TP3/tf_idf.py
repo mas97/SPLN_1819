@@ -91,17 +91,13 @@ def match_genre_count(suggestFilms,lower_value,movieRequest):
     return match
 
 def genres_ok(suggestFilms, movieRequest):
-    #print(genresDict[movieRequest])
+    print(genresDict[movieRequest])
     lower_value = suggestFilms[nFilms][1]
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
     for n,t in enumerate(suggestFilms[:nFilms]):
         if t[1]==lower_value:
-            print(n)
-            print(t)
             if len(match_genre)>0 and match_genre[0][1]>0 and len(set(genresDict[t[0]]) & set(genresDict[movieRequest])) < match_genre[0][1]:
-                print("ANTES")
                 suggestFilms[n]=match_genre[0]
-                print("DEPOIS")
                 del match_genre[0]
     return suggestFilms
 
@@ -126,6 +122,7 @@ def match(movieRequest):
             suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
         return suggestFilmsGenres
     else :
+        print("Não há esse filme no dataset")
         return []
 
 try:  
