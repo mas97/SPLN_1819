@@ -126,7 +126,7 @@
                     <th> Sentiment Analysis </th>
                     {% for sugestion in sugestions %}
                     <tr>
-                        <td> {{ sugestion[0] }} </td>
+                        <td> {{ sugestion[0].title() }} </td>
                         <td> {{ ', '.join(sugestion[1]) }} </td>
                         <td> <a href="{{ 'static/movies_sent_pict/' + sugestion[0] + '.png' }}" target="_blank"> <img src="{{ 'static/movies_sent_pict/' + sugestion[0] + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
                     </tr>
