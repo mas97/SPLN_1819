@@ -79,15 +79,15 @@ def match_count(mostImportantWords,movieWords):
 
 def match_genre_count(suggestFilms,lower_value,movieRequest):
     match = []
-    for t in suggestFilms:
-        if t[1] < lower_value:
+    for t in suggestFilms[nFilms:]:
+        if t[1]!=lower_value:
             break
-        elif t[1] == lower_value:
+        else:
             match.append((t[0],len(set(genresDict[movieRequest]) & set(genresDict[t[0]]))))
     match = sorted(match, key=lambda tup: tup[1], reverse = True)
     for m in match[:10]:
-        print(genresDict[m[0]])
         print(m[0])
+        print(genresDict[m[0]])
     return match
 
 def genres_ok(suggestFilms, movieRequest):
@@ -96,7 +96,7 @@ def genres_ok(suggestFilms, movieRequest):
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
     for n,t in enumerate(suggestFilms[:nFilms]):
         if t[1]==lower_value:
-            if match_genre[0][1]>0:
+            if match_genre[0][1]>0 and len(set(genresDict[t[0]]) & set(genresDict[movieRequest])) < match_genre[0][1]:
                 suggestFilms[n]=match_genre[0]
                 del match_genre[0]
     return suggestFilms
@@ -120,7 +120,6 @@ def match(movieRequest):
         suggestFilmsGenres = []
         for movie in suggestFilms[:nFilms]:
             suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
-        print(suggestFilmsGenres)
         return suggestFilmsGenres
     else :
         return []
