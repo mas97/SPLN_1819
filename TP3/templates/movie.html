@@ -71,7 +71,7 @@
     }
 
     #movie_sugestions {
-        padding-top: 320px;
+        padding-top: 50px;
         padding-left: 120px;
     }
 
@@ -128,7 +128,7 @@
                     <tr>
                         <td> {{ sugestion[0] }} </td>
                         <td> {{ ', '.join(sugestion[1]) }} </td>
-                        <td> <a href="{{ cover_url }}" target="_blank"> <img src="{{ cover_url }}"  alt="Sentiment Analysis not available" width="100" height="100" /></a> </td>
+                        <td> <a href="{{ 'static/movies_sent_pict/' + sugestion[0] + '.png' }}" target="_blank"> <img src="{{ 'static/movies_sent_pict/' + sugestion[0] + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
                     </tr>
                     {% endfor %}
                 </table>
