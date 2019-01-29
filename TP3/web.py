@@ -16,7 +16,7 @@ def getMovie():
     movie_name = request.form['movie_name']
 
     html_info = {}
-    sugestions = []
+    suggestions = []
 
     movies = IMDb_access.search_movie(movie_name)
 
@@ -60,7 +60,7 @@ def getMovie():
             html_info['Genres'] = ''
 
         try:
-            sugestions = match(movie_infos['title'].lower())
+            suggestions = match(movie_infos['title'].lower())
             movie_name = movie_infos['title']
         except:
             movie_name = 'Movie not Available'
@@ -70,7 +70,7 @@ def getMovie():
         except:
             cover_url = ''
 
-    return render_template('movie.html', movie_name = movie_name, html_infos = html_info, cover_url = cover_url, sugestions = sugestions)
+    return render_template('movie.html', movie_name = movie_name, html_infos = html_info, cover_url = cover_url, suggestions = suggestions)
 
 if __name__ == '__main__':
    app.run()
