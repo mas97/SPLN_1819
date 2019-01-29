@@ -96,8 +96,12 @@ def genres_ok(suggestFilms, movieRequest):
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
     for n,t in enumerate(suggestFilms[:nFilms]):
         if t[1]==lower_value:
-            if match_genre[0][1]>0 and len(set(genresDict[t[0]]) & set(genresDict[movieRequest])) < match_genre[0][1]:
+            print(n)
+            print(t)
+            if len(match_genre)>0 and match_genre[0][1]>0 and len(set(genresDict[t[0]]) & set(genresDict[movieRequest])) < match_genre[0][1]:
+                print("ANTES")
                 suggestFilms[n]=match_genre[0]
+                print("DEPOIS")
                 del match_genre[0]
     return suggestFilms
 
@@ -140,6 +144,19 @@ except Exception:
 #suggestFilms = match('batman')
 
 #print(pd.DataFrame(tfidfDict))
+#print(len(filmsDict))
+#print(len(orderDict))
+#print(len(genresDict))
+
+#for movie in orderDict:
+#    if movie in genresDict:
+#        pass
+#    else:
+#        print(movie)
+
+#print(filmsDict['nightmare on elm street the final chapter'])
+#print(genresDict['nightmare on elm street the final chapter'])
+
 
 
 
