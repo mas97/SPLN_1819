@@ -50,7 +50,7 @@ def build_movies_db(list_urls):
             movies_db[key] = url.strip()
     return movies_db
 
-def along_script_sent(full_script):
+def along_script_sent(title, full_script):
     """Realiza um gráfico com os valores do sentimento
        ao longo do filme passado por argumento."""
     num_blocks = 500
@@ -72,7 +72,9 @@ def along_script_sent(full_script):
     p = np.poly1d(z)
     plt.plot(x, p(x), "r--")
     plt.ylabel('< negativo ---- positivo >')
-    plt.show()
+    plt.savefig('movies_sent_pict/' + title + '.png', bbox_inches='tight')
+    plt.close()
+    #plt.show()
 
 
 def clean_script(text):
@@ -126,13 +128,19 @@ def save_full_scripts(list_urls):
             match = re.search(r'scripts/(.*?)\.html', url)
             if match:
                 title = fix_title(match.group(1))
-                # Map: title -> list of words
-                words_from_movies[title] = full_script
-                # Map: title -> list of genres
-                movies = IMDb_access.search_movie(title)
-                movie_infos = IMDb_access.get_movie(movies[0].getID())
-                genres_from_movies[title] = movie_infos['genre']
-            print('[' + str(i) + '/' + str(size) + '] ' + title)
+                if len(full_script) > 100:
+                    along_script_sent(title, full_script)
+                    # Map: title -> list of words
+                    words_from_movies[title] = full_script
+                    # Map: title -> list of genres
+                    movies = IMDb_access.search_movie(title)
+                    movie_infos = IMDb_access.get_movie(movies[0].getID())
+                    genres_from_movies[title] = movie_infos['genre']
+                    print('[' + str(i) + '/' + str(size) + '] ' + title)
+                else:
+                    print('[' + str(i) + '/' + str(size) + '] ' + title + ' [SMALL SCRIPT]')
+            else:
+                print('[' + str(i) + '/' + str(size) + '] ' + title + ' [PARSING ERROR]')
         except IndexError:
             match = re.search(r'scripts/(.*?)\.html', url)
             title = fix_title(match.group(1))
