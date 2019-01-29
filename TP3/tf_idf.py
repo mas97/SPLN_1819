@@ -137,7 +137,7 @@ except Exception:
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
 
-suggestFilms = match('batman')
+#suggestFilms = match('batman')
 
 #print(pd.DataFrame(tfidfDict))
 
