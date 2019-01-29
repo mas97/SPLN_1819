@@ -106,22 +106,41 @@ def load_obj(name):
     with open(name + '.pkl', 'rb') as fp:
         return pickle.load(fp)
 
+def fix_title(title):
+    match = re.search(r',-The$', title)
+    if match:
+        title = re.sub(r',-The$', '', title)
+        title = 'the ' + title
+    title = re.sub(r'-', ' ', title)
+    return title.lower()
+
 def save_full_scripts(list_urls):
     words_from_movies = {}
+    genres_from_movies = {}
+    IMDb_access = IMDb()
     size = len(list_urls)
     for i, url in enumerate(list_urls, start=1):
-        time.sleep(3)
+        time.sleep(1)
         try:
             full_script = scrap_full_script(url)
             match = re.search(r'scripts/(.*?)\.html', url)
             if match:
-                words_from_movies[match.group(1)] = full_script
-            print('[' + str(i) + '/' + str(size) + '] ' + match.group(1))
+                title = fix_title(match.group(1))
+                # Map: title -> list of words
+                words_from_movies[title] = full_script
+                # Map: title -> list of genres
+                movies = IMDb_access.search_movie(title)
+                movie_infos = IMDb_access.get_movie(movies[0].getID())
+                genres_from_movies[title] = movie_infos['genre']
+            print('[' + str(i) + '/' + str(size) + '] ' + title)
         except IndexError:
             match = re.search(r'scripts/(.*?)\.html', url)
-            print('[' + str(i) + '/' + str(size) + '] ' + match.group(1) + ' [NO SCRIPT]')
-    print('Saving to file...')
+            title = fix_title(match.group(1))
+            print('[' + str(i) + '/' + str(size) + '] ' + title + ' [NO SCRIPT]')
+    print('Saving words_from_movies to file...')
     save_obj(words_from_movies, 'dict_movies_list_words')
+    print('Saving genres_from_movies to file...')
+    save_obj(genres_from_movies, 'dict_movies_list_genres')
 
 if '-b' in ops:
     list_urls = get_movies_url()
