@@ -40,7 +40,7 @@ def getMovie():
     for key in movie_infos.keys():
         print(key)
 
-    sugestions = match(movie_infos['title'])
+    sugestions = match(movie_infos['title'].lower())
 
     return render_template('movie.html', movie_name = movie_infos['title'], html_infos = html_info, cover_url = movie_infos['full-size cover url'], sugestions = sugestions)
 
