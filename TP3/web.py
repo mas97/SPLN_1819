@@ -34,29 +34,40 @@ def getMovie():
 
         if 'languages' in movie_infos:
             html_info['Languages'] = ', '.join(movie_infos['languages'])
+        else:
+            html_info['Languages'] = ''
 
         if 'year' in movie_infos:
             html_info['Year'] = movie_infos['year']
+        else:
+            html_info['Year'] = ''
 
         if 'kind' in movie_infos:
             html_info['Kind'] = movie_infos['kind']
+        else:
+            html_info['Kind'] = ''
 
         if 'rating' in movie_infos:
             html_info['Rating'] = movie_infos['rating']
+        else:
+            html_info['Rating'] = ''
 
         if 'genre' in movie_infos:
             html_info['Genre'] = ', '.join(movie_infos['genre'])
+        else:
+            html_info['Genre'] = ''
 
         sugestions = match(movie_infos['title'].lower())
 
-        movie_name = []
         if 'title' in movie_infos:
             movie_name = movie_infos['title']
+        else:
+            movie_name = 'Movie not Available'
 
-        cover_url = movie_infos['full-size cover url']
-    else:
-        movie_name = "Movie not available."
-        cover_url = ""
+        if 'full-size cover url' in movie_infos:
+            cover_url = movie_infos['full-size cover url']
+        else:
+            cover_url = ''
 
     return render_template('movie.html', movie_name = movie_name, html_infos = html_info, cover_url = cover_url, sugestions = sugestions)
 
