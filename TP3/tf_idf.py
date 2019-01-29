@@ -71,39 +71,50 @@ def orderTFIDFvalues(tfidfDict):
         orderDict[movie] = sorted(words.items(), key=itemgetter(1),reverse=True)
     return orderDict
 
-def match_count(mostImportantWords,aux):
+def match_count(mostImportantWords,movieWords):
     mostImportantWordsFirstTuple= [t[0] for t in mostImportantWords]
-    auxFirstTuple = [t[0] for t in aux]
-    equalElem = set(mostImportantWordsFirstTuple) & set(auxFirstTuple)
+    movieWordsFirstTuple = [t[0] for t in movieWords]
+    equalElem = set(mostImportantWordsFirstTuple) & set(movieWordsFirstTuple)
     return len(equalElem)
 
+def match_genre_count(suggestFilms,lower_value,movieRequest):
+    match = []
+    for t in suggestFilms[nFilms:]:
+        if t[1]!= lower_value:
+            break
+        else:
+            match.append((t[0],len(set(genresDict[movieRequest]) & set(genresDict[t[0]]))))
+    match = sorted(match, key=lambda tup: tup[1], reverse = True)
+    #for m in match[:10]:
+    #    print(genresDict[m[0]])
+    return match
+
 def genres_ok(suggestFilms, movieRequest):
+    #print(genresDict[movieRequest])
     lower_value = suggestFilms[nFilms][1]
+    match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
     for n,t in enumerate(suggestFilms[:nFilms]):
         if t[1]==lower_value:
-            if len(set(genresDict[movieRequest]) & set(genresDict[t[0]])) == 0:
-                for n2,new in enumerate(suggestFilms[nFilms:]):
-                    if new[1]!= lower_value:
-                        break
-                    elif len(set(genresDict[movieRequest]) & set(genresDict[new[0]])) > 0:
-                         suggestFilms[n]=new
-                         del suggestFilms[nFilms + n2]
-                         break
+            if match_genre[0][1]>0:
+                suggestFilms[n]=match_genre[0]
+                del match_genre[0]
     return suggestFilms
 
 
 def match(movieRequest):
-    print(movieRequest)
+    #print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
         mostImportantWords= orderDict[movieRequest][:25]
         for movie, words in orderDict.items():
             if movieRequest != movie :
-                aux = words[:25]
-                suggestFilms.append((movie,match_count(mostImportantWords,aux)))
+                movieWords = words[:25]
+                suggestFilms.append((movie,match_count(mostImportantWords,movieWords)))
         suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
+        print("--SUGGESTÕES ANTES DE TRATAR GENERO--")
+        print(suggestFilms[:nFilms])
         suggestFilms = genres_ok(suggestFilms,movieRequest)
-        print("--SUGGEST--")
+        print("--SUGGESTÕES FINAIS--")
         print(suggestFilms[:nFilms])
         return suggestFilms[:nFilms]
     else :
@@ -122,7 +133,7 @@ except Exception:
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
 
-suggestFilms = match('titanic')
+#suggestFilms = match('batman')
 
 #print(pd.DataFrame(tfidfDict))
 
