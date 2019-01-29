@@ -22,51 +22,52 @@ def getMovie():
 
     if movies != []:
         movie_infos = IMDb_access.get_movie(movies[0].getID())
+        print(movie_infos)
         
         directors_names = []
-        if 'directors' in movie_infos:
+        try:
             directors = movie_infos['directors']
-            directors_names = []
             for director in directors:
                 directors_names.append(director['name'])
+        except:
+            directors_names = []
 
         html_info['Directors'] = ', '.join(directors_names)
 
-        if 'languages' in movie_infos:
+        try:
             html_info['Languages'] = ', '.join(movie_infos['languages'])
-        else:
+        except:
             html_info['Languages'] = ''
 
-        if 'year' in movie_infos:
+        try:
             html_info['Year'] = movie_infos['year']
-        else:
+        except:
             html_info['Year'] = ''
 
-        if 'kind' in movie_infos:
+        try:
             html_info['Kind'] = movie_infos['kind']
-        else:
+        except:
             html_info['Kind'] = ''
 
-        if 'rating' in movie_infos:
+        try:
             html_info['Rating'] = movie_infos['rating']
-        else:
+        except:
             html_info['Rating'] = ''
 
-        if 'genre' in movie_infos:
-            html_info['Genre'] = ', '.join(movie_infos['genre'])
-        else:
-            html_info['Genre'] = ''
+        try:
+            html_info['Genres'] = ', '.join(movie_infos['genres'])
+        except:
+            html_info['Genres'] = ''
 
-        sugestions = match(movie_infos['title'].lower())
-
-        if 'title' in movie_infos:
+        try:
+            sugestions = match(movie_infos['title'].lower())
             movie_name = movie_infos['title']
-        else:
+        except:
             movie_name = 'Movie not Available'
 
-        if 'full-size cover url' in movie_infos:
+        try:
             cover_url = movie_infos['full-size cover url']
-        else:
+        except:
             cover_url = ''
 
     return render_template('movie.html', movie_name = movie_name, html_infos = html_info, cover_url = cover_url, sugestions = sugestions)
