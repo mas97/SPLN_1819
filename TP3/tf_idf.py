@@ -85,8 +85,8 @@ def match_genre_count(suggestFilms,lower_value,movieRequest):
         else:
             match.append((t[0],len(set(genresDict[movieRequest]) & set(genresDict[t[0]]))))
     match = sorted(match, key=lambda tup: tup[1], reverse = True)
-    #for m in match[:10]:
-    #    print(genresDict[m[0]])
+    for m in match[:10]:
+        print(genresDict[m[0]])
     return match
 
 def genres_ok(suggestFilms, movieRequest):
@@ -105,10 +105,10 @@ def match(movieRequest):
     #print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
-        mostImportantWords= orderDict[movieRequest][:25]
+        mostImportantWords= orderDict[movieRequest][:100]
         for movie, words in orderDict.items():
             if movieRequest != movie :
-                movieWords = words[:25]
+                movieWords = words[:100]
                 suggestFilms.append((movie,match_count(mostImportantWords,movieWords)))
         suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
         print("--SUGGESTÕES ANTES DE TRATAR GENERO--")
@@ -122,7 +122,7 @@ def match(movieRequest):
         print(suggestFilmsGenres)
         return suggestFilmsGenres
     else :
-        print('No film on dataset, try another')
+        return []
 
 try:  
     filmsDict = load_obj("dict_movies_list_words")
@@ -137,7 +137,7 @@ except Exception:
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
 
-suggestFilms = match('batman')
+#suggestFilms = match('batman')
 
 #print(pd.DataFrame(tfidfDict))
 
