@@ -15,34 +15,41 @@ def search():
 def getMovie():
     movie_name = request.form['movie_name']
 
-    movies = IMDb_access.search_movie(movie_name)
-    movie_infos = IMDb_access.get_movie(movies[0].getID())
-
     html_info = {}
-    
-    directors = movie_infos['directors']
-    directors_names = []
-    for director in directors:
-        directors_names.append(director['name'])
+    sugestions = []
 
-    html_info['Directors'] = ', '.join(directors_names)
+    movies = IMDb_access.search_movie(movie_name)
 
-    html_info['Languages'] = ', '.join(movie_infos['languages'])
+    if movies != []:
+        movie_infos = IMDb_access.get_movie(movies[0].getID())
+        
+        directors = movie_infos['directors']
+        directors_names = []
+        for director in directors:
+            directors_names.append(director['name'])
 
-    html_info['Year'] = movie_infos['year']
+        html_info['Directors'] = ', '.join(directors_names)
 
-    html_info['Kind'] = movie_infos['kind']
+        html_info['Languages'] = ', '.join(movie_infos['languages'])
 
-    html_info['Rating'] = movie_infos['rating']
+        html_info['Year'] = movie_infos['year']
 
-    html_info['Genre'] = ', '.join(movie_infos['genre'])
+        html_info['Kind'] = movie_infos['kind']
 
-    for key in movie_infos.keys():
-        print(key)
+        html_info['Rating'] = movie_infos['rating']
 
-    sugestions = match(movie_infos['title'].lower())
+        html_info['Genre'] = ', '.join(movie_infos['genre'])
 
-    return render_template('movie.html', movie_name = movie_infos['title'], html_infos = html_info, cover_url = movie_infos['full-size cover url'], sugestions = sugestions)
+        sugestions = match(movie_infos['title'].lower())
+
+        movie_name = movie_infos['title']
+
+        cover_url = movie_infos['full-size cover url']
+    else:
+        movie_name = "Movie not available."
+        cover_url = ""
+
+    return render_template('movie.html', movie_name = movie_name, html_infos = html_info, cover_url = cover_url, sugestions = sugestions)
 
 if __name__ == '__main__':
    app.run()
