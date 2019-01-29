@@ -91,6 +91,7 @@ def match_genre_count(suggestFilms,lower_value,movieRequest):
     return match
 
 def genres_ok(suggestFilms, movieRequest):
+    print('--sugest filme--')
     print(genresDict[movieRequest])
     lower_value = suggestFilms[nFilms][1]
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
@@ -120,6 +121,8 @@ def match(movieRequest):
         suggestFilmsGenres = []
         for movie in suggestFilms[:nFilms]:
             suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
+        #print("--RESULTADOS--")
+        #print(suggestFilmsGenres)
         return suggestFilmsGenres
     else :
         print("Não há esse filme no dataset")
@@ -138,7 +141,7 @@ except Exception:
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
 
-#suggestFilms = match('batman')
+#suggestFilms = match('12 and holding')
 
 #print(pd.DataFrame(tfidfDict))
 #print(len(filmsDict))
