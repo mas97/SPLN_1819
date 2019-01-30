@@ -13,10 +13,10 @@ def search():
 
 @app.route('/movie/<id>')
 def movie(id):
-    movie_name = id
+    movie_name_original = id
     html_info = {}
 
-    movies = IMDb_access.search_movie(movie_name)
+    movies = IMDb_access.search_movie(movie_name_original)
 
     if movies != []:
         movie_infos = IMDb_access.get_movie(movies[0].getID())
@@ -67,7 +67,7 @@ def movie(id):
             cover_url = ''
         
         try:
-            suggestions = match(movie_infos['title'].lower())
+            suggestions = match(movie_name_original)
             suggestion_error = False
         except:
             suggestion_error = True
