@@ -57,7 +57,7 @@ def movie(id):
             html_info['Genres'] = ''
 
         try:
-            movie_name = movie_infos['title']
+            movie_name = movie_name
         except:
             movie_name = 'Movie not Available'
 
