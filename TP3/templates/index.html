@@ -116,7 +116,7 @@
 			</div>
 			<div id="search-form">
 				<form class="form-container" action="" method="POST">
-					<input name="movie_name" type="text" class="search-field" value="Ex: Titanic ..." />
+					<input name="movie_name" id="text" type="text" class="search-field" value="Ex: Titanic ..." />
 					<div class="submit-container">
 						<input type="submit" value="" class="submit" />
 					</div>
@@ -125,6 +125,25 @@
 					<p>Insert film name here.</p>
 				</div>
 			</div>
+		</div>
+		<script type="text/javascript">
+			function exec(film_name)
+			{
+				var text = document.getElementById('text');
+				text.value = film_name;
+			}
+		</script>
+		<div class= "movies_list">
+			<table>
+				{% for movie in movies.keys() %}
+				<tr>
+					<td>
+						{% set urlParam = 'exec("' ~movie ~'")' %}
+						<a href="{{ url_for('movie', id=movie) }}" >{{ movie }}</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</table>
 		</div>
 	</body>
 </html>

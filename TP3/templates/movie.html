@@ -6,7 +6,7 @@
 	<title>SPLN - Movie Suggestion</title>
 
 	<!-- CSS -->
-    <link rel="stylesheet" href="static/style.css" type="text/css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css" />
 
     <!-- Fonts -->
 	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,700italic,400,600,700' rel='stylesheet' type='text/css'>
@@ -120,7 +120,7 @@
         </div>
 
         <div id="movie_sugestions" style="float: left">
-                <table>
+                <table >
                     <th> Suggestions </th>
                     <th> Genre </th>
                     <th> Sentiment Analysis </th>
@@ -133,7 +133,7 @@
                     <tr>
                         <td> {{ suggestion[0].title() }} </td>
                         <td> {{ ', '.join(suggestion[1]) }} </td>
-                        <td> <a href="{{ 'static/movies_sent_pict/' + suggestion[0] + '.png' }}" target="_blank"> <img src="{{ 'static/movies_sent_pict/' + suggestion[0] + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
+                        <td> <a href="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}" target="_blank"> <img src="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
                     </tr>
                     {% endfor %}
                     {% endif %}
