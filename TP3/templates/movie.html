@@ -124,6 +124,11 @@
                     <th> Suggestions </th>
                     <th> Genre </th>
                     <th> Sentiment Analysis </th>
+                    {% if suggestion_error %}
+                    <tr>
+                        <td> Error loading suggestions </td>
+                    </tr>
+                    {% else %}
                     {% for suggestion in suggestions %}
                     <tr>
                         <td> {{ suggestion[0].title() }} </td>
@@ -131,6 +136,7 @@
                         <td> <a href="{{ 'static/movies_sent_pict/' + suggestion[0] + '.png' }}" target="_blank"> <img src="{{ 'static/movies_sent_pict/' + suggestion[0] + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
                     </tr>
                     {% endfor %}
+                    {% endif %}
                 </table>
         </div>     
     </body>
