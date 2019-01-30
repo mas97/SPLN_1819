@@ -60,7 +60,8 @@ def getMovie():
             html_info['Genres'] = ''
 
         try:
-            sugestions = match(movie_infos['title'].lower())
+            movie_title = movie_infos['title'].replace(":","")
+            sugestions = match(movie_title.lower())
             movie_name = movie_infos['title']
         except:
             movie_name = 'Movie not Available'
