@@ -4,6 +4,7 @@ import json
 import requests
 from tf_idf import match
 from scraping import load_obj
+from difflib import SequenceMatcher
 
 # Quota: 300
 access_key = '329367-Sugestão-E0OVQYJW'
@@ -35,10 +36,25 @@ def tastedive_suggested(title):
     return suggested_movies
 
 
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def calc_now_true_positive(control, testing):
+    now_true_positive = 0
+    for title_testing in testing:
+        print(title_testing)
+        for title_control in control:
+            if similar(title_testing, title_control.lower()) >= 0.8:
+                now_true_positive += 1
+                break
+    return now_true_positive
+
+
 def update_values(control, testing):
     """Atualiza os valores TRUE_POSITIVE e FALSE_POSITIVE"""
     global TRUE_POSITIVE, FALSE_POSITIVE, FALSE_NEGATIVE
-    now_true_positive = len(set(testing) & set(control))
+    now_true_positive = calc_now_true_positive(control, testing)
     TRUE_POSITIVE += now_true_positive
     FALSE_NEGATIVE += len(control) - now_true_positive
     FALSE_POSITIVE += len(testing) - now_true_positive
