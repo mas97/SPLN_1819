@@ -21,7 +21,7 @@ def load_available_movies():
         words_from_movies = load_obj('dict_movies_list_words')
         return list(words_from_movies.keys())
     except:
-        print('ERROR - First run: ./scrapping.py -b')
+        print('ERROR - First use scrapping.py')
         exit(1)
 
 

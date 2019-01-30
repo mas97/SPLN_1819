@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from pprint import pprint
 
-opts, args = getopt.getopt(sys.argv[1:], 'hbl')
+opts, args = getopt.getopt(sys.argv[1:], 'hfgb')
 ops = dict(opts)
 
 def get_movies_url():
@@ -75,7 +75,7 @@ def along_script_sent(title, full_script):
     p = np.poly1d(z)
     plt.plot(x, p(x), "r--")
     plt.ylabel('< negativo ---- positivo >')
-    plt.savefig('movies_sent_pict/' + title + '.png', bbox_inches='tight')
+    plt.savefig('static/movies_sent_pict/' + title + '.png', bbox_inches='tight')
     plt.close()
     #plt.show()
 
@@ -138,7 +138,7 @@ def save_full_scripts(list_urls):
             if match:
                 title = fix_title(match.group(1))
                 if len(full_script) > 100:
-                    along_script_sent(title, full_script)
+                    #along_script_sent(title, full_script)
                     # Map: title -> list of words
                     words_from_movies[title] = full_script
                     print('[' + str(i) + '/' + str(size) + '] ' + title)
@@ -176,12 +176,20 @@ def save_genres(titles):
     print('Saving genres_from_movies to file...')
     save_obj(genres_from_movies, 'dict_movies_list_genres')
 
-            
-
 if '-b' in ops:
-    urls, titles = get_movies_url()
-    save_genres(titles)
-    save_full_scripts(urls)
+    URLS, TITLES = get_movies_url()
+    save_full_scripts(URLS)
+    save_genres(TITLES)
+    print('Done!')
+
+if '-f' in ops:
+    URLS, TITLES = get_movies_url()
+    save_full_scripts(URLS)
+    print('Done!')
+
+if '-g' in ops:
+    URLS, TITLES = get_movies_url()
+    save_genres(TITLES)
     print('Done!')
 
 if '-h' in ops:
