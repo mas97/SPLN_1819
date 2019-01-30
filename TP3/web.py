@@ -67,7 +67,7 @@ def movie(id):
             cover_url = ''
         
         try:
-            suggestions = match(movie_infos['title'].lower())
+            suggestions = match(movie_name)
             suggestion_error = False
         except:
             suggestion_error = True
