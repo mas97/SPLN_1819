@@ -11,6 +11,7 @@ from scraping import save_obj,load_obj,get_movies_url,save_full_scripts
 
 #testDict = {'docA' :"The cat sat on my", 'docB' :"The dog sat on my bed"}
 nFilms = 10
+topWords = 50
 def buildWordCountDict(dict_movies):
     dict = {}
     for movie,words in dict_movies.items():
@@ -85,14 +86,14 @@ def match_genre_count(suggestFilms,lower_value,movieRequest):
         else:
             match.append((t[0],len(set(genresDict[movieRequest]) & set(genresDict[t[0]]))))
     match = sorted(match, key=lambda tup: tup[1], reverse = True)
-    for m in match[:10]:
-        print(m[0])
-        print(genresDict[m[0]])
+    #for m in match[:10]:
+    #    print(m[0])
+    #    print(genresDict[m[0]])
     return match
 
 def genres_ok(suggestFilms, movieRequest):
-    print('--sugest filme--')
-    print(genresDict[movieRequest])
+    #print('--sugest filme--')
+    #print(genresDict[movieRequest])
     lower_value = suggestFilms[nFilms][1]
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
     for n,t in enumerate(suggestFilms[:nFilms]):
@@ -104,20 +105,20 @@ def genres_ok(suggestFilms, movieRequest):
 
 
 def match(movieRequest):
-    print(movieRequest)
+    #print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
-        mostImportantWords= orderDict[movieRequest][:100]
+        mostImportantWords= orderDict[movieRequest][:topWords]
         for movie, words in orderDict.items():
             if movieRequest != movie :
-                movieWords = words[:100]
+                movieWords = words[:topWords]
                 suggestFilms.append((movie,match_count(mostImportantWords,movieWords)))
         suggestFilms = sorted(suggestFilms, key=lambda tup: tup[1], reverse = True)
-        print("--SUGGESTÕES ANTES DE TRATAR GENERO--")
-        print(suggestFilms[:nFilms])
+        #print("--SUGGESTÕES ANTES DE TRATAR GENERO--")
+        #print(suggestFilms[:nFilms])
         suggestFilms = genres_ok(suggestFilms,movieRequest)
-        print("--SUGGESTÕES FINAIS--")
-        print(suggestFilms[:nFilms])
+        #print("--SUGGESTÕES FINAIS--")
+        #print(suggestFilms[:nFilms])
         suggestFilmsGenres = []
         for movie in suggestFilms[:nFilms]:
             suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
@@ -125,7 +126,7 @@ def match(movieRequest):
         #print(suggestFilmsGenres)
         return suggestFilmsGenres
     else :
-        print("Não há esse filme no dataset")
+        #print("Não há esse filme no dataset")
         return []
 
 try:  
