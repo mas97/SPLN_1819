@@ -104,7 +104,7 @@ def genres_ok(suggestFilms, movieRequest):
 
 
 def match(movieRequest):
-    #print(movieRequest)
+    print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
         mostImportantWords= orderDict[movieRequest][:100]

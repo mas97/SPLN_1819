@@ -122,7 +122,7 @@ def getMovie():
             html_info['Genres'] = ''
 
         try:
-            movie_name = movie_infos['title']
+             movie_name = movie_infos['title']
         except:
             movie_name = 'Movie not Available'
 
@@ -132,7 +132,8 @@ def getMovie():
             cover_url = ''
         
         try:
-            suggestions = match(movie_infos['title'].lower())
+            movie_title = movie_infos['title'].replace(":","")
+            suggestions = match(movie_title.lower())
             suggestion_error = False
         except:
             suggestion_error = True
