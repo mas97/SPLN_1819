@@ -43,7 +43,6 @@ def similar(a, b):
 def calc_now_true_positive(control, testing):
     now_true_positive = 0
     for title_testing in testing:
-        print(title_testing)
         for title_control in control:
             if similar(title_testing, title_control.lower()) >= 0.8:
                 now_true_positive += 1
