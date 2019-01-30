@@ -82,6 +82,10 @@
 		padding-right: 120px
 	}
 
+	td {
+		text-align: left;
+	}
+
 	.header {
 		float: center;
 		padding-top: 100px
@@ -135,6 +139,7 @@
 		</script>
 		<div class= "movies_list">
 			<table>
+				<th> Movies list </th>
 				{% for movie in movies.keys() %}
 				<tr>
 					<td>
