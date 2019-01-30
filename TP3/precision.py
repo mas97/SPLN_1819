@@ -28,7 +28,7 @@ def tastedive_suggested(title):
        para um certo filme."""
     suggested_movies = []
     request = requests.get('https://tastedive.com/api/similar?q=%22movie:' +\
-                           title + '%22&type=movies&k=' + access_key)
+                           title + '%22&type=movies&limit=10&k=' + access_key)
     td_data = json.loads(request.text)
     for movie_entry in td_data['Similar']['Results']:
         suggested_movies.append(movie_entry['Name'].lower())
