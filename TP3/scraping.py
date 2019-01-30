@@ -138,7 +138,7 @@ def save_full_scripts(list_urls):
             if match:
                 title = fix_title(match.group(1))
                 if len(full_script) > 100:
-                    #along_script_sent(title, full_script)
+                    along_script_sent(title, full_script)
                     # Map: title -> list of words
                     words_from_movies[title] = full_script
                     print('[' + str(i) + '/' + str(size) + '] ' + title)
@@ -193,10 +193,9 @@ if '-g' in ops:
     print('Done!')
 
 if '-h' in ops:
-    print("""Uso: python bs.py [OPTION]
+    print("""Uso: ./scraping.py [OPTION]
 Opções:
-    -b      Permite carregar todos os filmes do site IMSDb.
-    -a      Permite analisar o sentimento ao longo de um filme. Só pode ser usada depois da opção -b.
-    -s      Permite pesquisar informações sobre um dado filme.
-    -c      Permite listar as personagens de um dado filme. Só pode ser usada depois da opção -b.""")
-
+    -b      Permite criar dois dicionários, um em que se associa o título do filme ao guião completo e outro que associa o título a uma lista dos géneros. Ambos são guardados em ficheiros pickle.
+    -f      Permite guardar num ficheiro pickle um dicionário que associa o título do filme ao seu guião completo.
+    -g      Permite guardar num ficheiro pickle um dicionário que associa o título do filme a uma lista com os géneros associados a este.
+    -h      Imprime esta ajuda.""")
