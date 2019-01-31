@@ -9,9 +9,8 @@ import pandas as pd
 from operator import itemgetter
 from scraping import save_obj,load_obj,get_movies_url,save_full_scripts
 
-#testDict = {'docA' :"The cat sat on my", 'docB' :"The dog sat on my bed"}
 nFilms = 10
-topWords = 50
+topWords = 100
 def buildWordCountDict(dict_movies):
     dict = {}
     for movie,words in dict_movies.items():
@@ -92,7 +91,7 @@ def match_genre_count(suggestFilms,lower_value,movieRequest):
     return match
 
 def genres_ok(suggestFilms, movieRequest):
-    #print('--sugest filme--')
+    #print('--filme pesquisado--')
     #print(genresDict[movieRequest])
     lower_value = suggestFilms[nFilms][1]
     match_genre = match_genre_count(suggestFilms,lower_value,movieRequest)
@@ -105,7 +104,6 @@ def genres_ok(suggestFilms, movieRequest):
 
 
 def match(movieRequest):
-    #print(movieRequest)
     suggestFilms = []
     if movieRequest in orderDict:
         mostImportantWords= orderDict[movieRequest][:topWords]
@@ -122,11 +120,8 @@ def match(movieRequest):
         suggestFilmsGenres = []
         for movie in suggestFilms[:nFilms]:
             suggestFilmsGenres.append((movie[0],genresDict[movie[0]]))
-        #print("--RESULTADOS--")
-        #print(suggestFilmsGenres)
         return suggestFilmsGenres
     else :
-        #print("Não há esse filme no dataset")
         return []
 
 try:  
@@ -141,24 +136,3 @@ except Exception:
     tfidfDict = buildTFIDF(filmsDict) #Dict = {"movie1": {"palavra1": tfidf value, "palavra2": tfidf value}, "movie2": {"palavra1": tfidf value}}
     orderDict = orderTFIDFvalues(tfidfDict) #Dict = {"movie1:" [('palavra1',tfidf value), ('palavra2', tfidf value)], "movie2": ['palavra1':tfidf value]}    
     save_obj(orderDict,'dict_tfidf_movies_order')
-
-#suggestFilms = match('12 and holding')
-
-#print(pd.DataFrame(tfidfDict))
-#print(len(filmsDict))
-#print(len(orderDict))
-#print(len(genresDict))
-
-#for movie in orderDict:
-#    if movie in genresDict:
-#        pass
-#    else:
-#        print(movie)
-
-#print(filmsDict['nightmare on elm street the final chapter'])
-#print(genresDict['nightmare on elm street the final chapter'])
-
-
-
-
-
