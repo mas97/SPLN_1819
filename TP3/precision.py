@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
 
+import getopt
+import sys
 import json
 import requests
 from tf_idf import match
@@ -62,15 +64,12 @@ def update_values(control, testing):
 def test_suggest_engine_precision(movies):
     """Compara os resultados entre o motor de sugestão desenvolvido
        e as sugestões do site tastedive"""
-    for movie in movies[0:250]:
+    for movie in movies:
         print('Processing ' + movie)
         control = tastedive_suggested(movie)
         testing = [m[0] for m in match(movie)]
         if control and testing:
             update_values(control, testing)
-    print('True positive: ' + str(TRUE_POSITIVE))
-    print('False positive: ' + str(FALSE_POSITIVE))
-    print('False negative: ' + str(FALSE_NEGATIVE))
 
 
 def calc_precision(true_positive, false_positive):
@@ -90,3 +89,18 @@ def calc_f1(precision, recall):
 
 MOVIES = load_available_movies()
 test_suggest_engine_precision(MOVIES)
+print('True positive: ' + str(TRUE_POSITIVE))
+print('False positive: ' + str(FALSE_POSITIVE))
+print('False negative: ' + str(FALSE_NEGATIVE))
+
+print('Calculating precision...')
+precision = calc_precision(TRUE_POSITIVE, FALSE_POSITIVE)
+print('Precision = ' + str(precision))
+
+print('Calculating recall...')
+recall = calc_recall(TRUE_POSITIVE, FALSE_NEGATIVE)
+print('Recall = ' + str(recall))
+
+print('Calculating f1_score...')
+print('F1 Score = ' + str(calc_f1(precision, recall)))
+
