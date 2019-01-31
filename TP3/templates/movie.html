@@ -95,6 +95,10 @@
         border: 1px solid #ccc;  
         }
     }
+	.demo div {
+		float: left;
+		clear: none;
+	}
     </style>
 
     
@@ -105,39 +109,46 @@
         
         <h1>{{movie_name}}</h1>
 
-        <div id="movie_info_table" style="float: left">
-            <table>
-                    {% for key in html_infos.keys() %}
-                    <tr>
-                        <td> <b> {{ key }} </b> </td>
-                        <td> {{ html_infos[key] }} </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-        </div>
-        <div id="movie_cover" style="float: right">
-            <img src="{{ cover_url }}" alt="Cover image not available" width="300" height="450">
-        </div>
+		<div class="demo">
+			<div id="movie_info_table">
+				<table>
+					{% for key in html_infos.keys() %}
+					<tr>
+						<td> <b> {{ key }} </b> </td>
+						<td> {{ html_infos[key] }} </td>
+					</tr>
+					{% endfor %}
+					<tr></tr>
+					<tr></tr>
+					<tr></tr>
+					<tr>
+						<td colspan="2">
+							<img src="{{ cover_url }}" alt="Cover image not available" width="300" height="450">
+						</td>
+					</tr>
+				</table>
+			</div>
 
-        <div id="movie_sugestions" style="float: left">
-                <table >
-                    <th> Suggestions </th>
-                    <th> Genre </th>
-                    <th> Sentiment Analysis </th>
-                    {% if suggestion_error %}
-                    <tr>
-                        <td> Error loading suggestions </td>
-                    </tr>
-                    {% else %}
-                    {% for suggestion in suggestions %}
-                    <tr>
-                        <td> {{ suggestion[0].title() }} </td>
-                        <td> {{ ', '.join(suggestion[1]) }} </td>
-                        <td> <a href="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}" target="_blank"> <img src="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
-                    </tr>
-                    {% endfor %}
-                    {% endif %}
-                </table>
-        </div>     
+			<div id="movie_sugestions">
+					<table >
+						<th> Suggestions </th>
+						<th> Genre </th>
+						<th> Sentiment Analysis </th>
+						{% if suggestion_error %}
+						<tr>
+							<td> Error loading suggestions </td>
+						</tr>
+						{% else %}
+						{% for suggestion in suggestions %}
+						<tr>
+							<td> {{ suggestion[0].title() }} </td>
+							<td> {{ ', '.join(suggestion[1]) }} </td>
+							<td> <a href="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}" target="_blank"> <img src="{{ url_for('static', filename= 'movies_sent_pict/' + suggestion[0]) + '.png' }}"  alt="Sentiment Analysis not available" width="295" height="208" /></a> </td>
+						</tr>
+						{% endfor %}
+						{% endif %}
+					</table>
+			</div>     
+		</div>
     </body>
 </html>
